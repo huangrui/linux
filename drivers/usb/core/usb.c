@@ -1004,6 +1004,7 @@ static void usb_debugfs_cleanup(void)
 /*
  * Init
  */
+// Rui is watching func usb_init
 static int __init usb_init(void)
 {
 	int retval;
@@ -1077,6 +1078,7 @@ static void __exit usb_exit(void)
 	usb_debugfs_cleanup();
 }
 
-subsys_initcall(usb_init);
+// Rui is watching func subsys_initcall
+subsys_initcall(usb_init); // init a subsystem for USB devices
 module_exit(usb_exit);
 MODULE_LICENSE("GPL");
