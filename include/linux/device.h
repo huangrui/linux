@@ -88,6 +88,8 @@ extern void bus_remove_file(struct bus_type *, struct bus_attribute *);
  * default attributes, the bus' methods, PM operations, and the driver core's
  * private data.
  */
+// Rui is watching here, and for deleted klist and kset drivers and devices
+// Please see commit c6f7e72a3f4641095ade9ded287d910c980c6148
 struct bus_type {
 	const char		*name;
 	const char		*dev_name;
@@ -215,7 +217,7 @@ extern struct klist *bus_get_device_klist(struct bus_type *bus);
  */
 struct device_driver {
 	const char		*name;
-	struct bus_type		*bus;
+	struct bus_type		*bus; // 表示这个设备连接到的总线
 
 	struct module		*owner;
 	const char		*mod_name;	/* used for built-in modules */
@@ -631,6 +633,7 @@ struct device_dma_parameters {
  * instead, that structure, like kobject structures, is usually embedded within
  * a higher-level representation of the device.
  */
+//Rui is watching here
 struct device {
 	struct device		*parent;
 
@@ -644,8 +647,8 @@ struct device {
 					 * its driver.
 					 */
 
-	struct bus_type	*bus;		/* type of bus device is on */
-	struct device_driver *driver;	/* which driver has allocated this
+	struct bus_type	*bus;		/* type of bus device is on */ //该设备链接到哪个总线上
+	struct device_driver *driver;	/* which driver has allocated this //该设备的驱动
 					   device */
 	void		*platform_data;	/* Platform specific data, device
 					   core doesn't touch it */
