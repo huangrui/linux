@@ -157,12 +157,13 @@ enum usb_interface_condition {
  * stored in numerical order anyhow.  Use usb_altnum_to_altsetting() to
  * look up an alternate setting in the altsetting array based on its number.
  */
+// Rui is watching here, Section III
 struct usb_interface {
 	/* array of alternate settings for this interface,
 	 * stored in no particular order */
-	struct usb_host_interface *altsetting;
+	struct usb_host_interface *altsetting;  //可选设置
 
-	struct usb_host_interface *cur_altsetting;	/* the currently
+	struct usb_host_interface *cur_altsetting;	/* the currently  //当前设置
 					 * active alternate setting */
 	unsigned num_altsetting;	/* number of alternate settings */
 
@@ -170,7 +171,7 @@ struct usb_interface {
 	 * the associated interfaces */
 	struct usb_interface_assoc_descriptor *intf_assoc;
 
-	int minor;			/* minor number this interface is
+	int minor;			/* minor number this interface is // 次设备号
 					 * bound to */
 	enum usb_interface_condition condition;		/* state of binding */
 	unsigned sysfs_files_created:1;	/* the sysfs attributes exist */
@@ -184,7 +185,7 @@ struct usb_interface {
 
 	struct device dev;		/* interface specific device info */
 	struct device *usb_dev;
-	atomic_t pm_usage_cnt;		/* usage counter for autosuspend */
+	atomic_t pm_usage_cnt;		/* usage counter for autosuspend */  //为0则允许接口autosuspend
 	struct work_struct reset_ws;	/* for resets in atomic context */
 };
 #define	to_usb_interface(d) container_of(d, struct usb_interface, dev)
