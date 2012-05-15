@@ -82,9 +82,9 @@ struct usb_host_interface {
 	 */
 	struct usb_host_endpoint *endpoint;
 
-	char *string;		/* iInterface string, if present */
-	unsigned char *extra;   /* Extra descriptors */
-	int extralen;
+	char *string;		/* iInterface string, if present */ //字符串描述信息
+	unsigned char *extra;   /* Extra descriptors */ //额外描述符给各厂商特别定义
+	int extralen; //额外描述符的长度
 };
 
 enum usb_interface_condition {
