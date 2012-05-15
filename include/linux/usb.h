@@ -85,7 +85,7 @@ struct usb_host_interface {
 	 */
 	struct usb_host_endpoint *endpoint;
 
-	char *string;		/* iInterface string, if present */
+	char *string;		/* iInterface string, if present */ //字符串描述信息
 };
 
 enum usb_interface_condition {

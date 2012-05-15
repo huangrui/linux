@@ -343,19 +343,22 @@ struct usb_string_descriptor {
 
 /* USB_DT_INTERFACE: Interface descriptor */
 struct usb_interface_descriptor {
-	__u8  bLength;
-	__u8  bDescriptorType;
+	__u8  bLength; //描述符的字节长度, 接口描述符一般长度为9
+	__u8  bDescriptorType; //描述符类型
 
-	__u8  bInterfaceNumber;
-	__u8  bAlternateSetting;
-	__u8  bNumEndpoints;
-	__u8  bInterfaceClass;
-	__u8  bInterfaceSubClass;
-	__u8  bInterfaceProtocol;
-	__u8  iInterface;
-} __attribute__ ((packed));
+	__u8  bInterfaceNumber; //接口号
+	__u8  bAlternateSetting; //接口使用的是哪个可选设置
+	__u8  bNumEndpoints; //接口拥有的端点数量
+	__u8  bInterfaceClass; //(区分各种USB设备的特点)分类: 每个Device或Interface属于一个Class
+	__u8  bInterfaceSubClass; //(区分各种USB设备的特点)子类: Class下面又分为SubClass
+	__u8  bInterfaceProtocol; /*(区分各种USB设备的特点)规范: SubClass又按各种设备所
+				   *所遵循的不同的通信协议再细分，Class, SubClass, Protocol
+				   *都定义成一个数值如 0x08, 0x09
+				   */
+	__u8  iInterface; //接口对应字符串描述符的索引值。
+} __attribute__ ((packed)); //告诉编译器这个结构的元素都是1字节对齐的
 
-#define USB_DT_INTERFACE_SIZE		9
+#define USB_DT_INTERFACE_SIZE		9  //接口描述符长度
 
 /*-------------------------------------------------------------------------*/
 
