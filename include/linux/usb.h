@@ -64,8 +64,17 @@ struct ep_device;
 struct usb_host_endpoint {
 	struct usb_endpoint_descriptor		desc;
 	struct usb_ss_ep_comp_descriptor	ss_ep_comp;
-	struct list_head		urb_list;
-	void				*hcpriv;
+	struct list_head		urb_list; /*urb是USB通信的主角
+						   *urb_list包含了urb传输的
+						   *所有信息。
+						   *你的usb通信,就得创建一个urb,并
+						   *且为它赋好值,交给咱们的usb core,
+						   *它会找到合适的host controller,
+						   *从而进行具体的数据传输。
+						   *设备中的每个端点都可以处理一个urb队列,
+						   *urb是内核里对usb传输数据的封装
+						   */
+	void				*hcpriv; //提供给HCD(host controller driver)用
 	struct ep_device		*ep_dev;	/* For sysfs info */
 
 	unsigned char *extra;   /* Extra descriptors */

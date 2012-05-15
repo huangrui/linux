@@ -349,10 +349,16 @@ struct usb_interface_descriptor {
 	__u8  bInterfaceNumber; //接口号
 	__u8  bAlternateSetting; //接口使用的是哪个可选设置
 	__u8  bNumEndpoints; //接口拥有的端点数量
-	__u8  bInterfaceClass; //(区分各种USB设备的特点)分类: 每个Device或Interface属于一个Class
-	__u8  bInterfaceSubClass; //(区分各种USB设备的特点)子类: Class下面又分为SubClass
-	__u8  bInterfaceProtocol; /*(区分各种USB设备的特点)规范: SubClass又按各种设备所
-				   *所遵循的不同的通信协议再细分，Class, SubClass, Protocol
+	__u8  bInterfaceClass; /*(区分各种USB设备的特点)分类: 每个Device或
+				*Interface属于一个Class
+				*/
+	__u8  bInterfaceSubClass; /*(区分各种USB设备的特点)子类: 
+				   *Class下面又分为SubClass
+				   */
+	__u8  bInterfaceProtocol; /*(区分各种USB设备的特点)规范:
+				   *SubClass又按各种设备所
+				   *所遵循的不同的通信协议再细分，
+				   *Class, SubClass, Protocol
 				   *都定义成一个数值如 0x08, 0x09
 				   */
 	__u8  iInterface; //接口对应字符串描述符的索引值。
@@ -364,13 +370,25 @@ struct usb_interface_descriptor {
 
 /* USB_DT_ENDPOINT: Endpoint descriptor */
 struct usb_endpoint_descriptor {
-	__u8  bLength;
-	__u8  bDescriptorType;
+	__u8  bLength; //一般为7，多了2个音频扩展
+	__u8  bDescriptorType; //端点对应USB_DT_ENDPOINT, 0x05
 
-	__u8  bEndpointAddress;
-	__u8  bmAttributes;
-	__le16 wMaxPacketSize;
-	__u8  bInterval;
+	__u8  bEndpointAddress; /*bits0~3表示端点号, 
+				 *使用掩码0x0f(USB_ENDPOINT_NUMBER_MASK)
+				 *bit8表示方向，输入还是输出，
+				 *使用掩码0x80(USB_ENDPOINT_DIR_MASK)
+				 *用USB_DIR_IN, USB_DIR_OUT判断方向
+				 */
+	__u8  bmAttributes; /*bit1和bit0称为Transfer Type: 00表示控制, 01表示
+			     *等时, 10表示批量, 11表示中断
+			     *USB_ENDPOINT_XFERTYPE_MASK 0x03
+			     *USB_ENDPOINT_XFER_CONTROL  0
+			     *USB_ENDPOINT_XFER_ISOC 	 1
+			     *USB_ENDPOINT_XFER_BULK 	 2
+			     *USB_ENDPOINT_XFER_INT  	 3
+			     */
+	__le16 wMaxPacketSize; //一次可以处理的最大字节数
+	__u8  bInterval; //USB是轮询式的总线,不同传输类型意义不同
 
 	/* NOTE:  these two are _only_ in audio endpoints. */
 	/* use USB_DT_ENDPOINT*_SIZE in bLength, not sizeof. */
