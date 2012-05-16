@@ -323,6 +323,9 @@ int __usb_get_extra_descriptor(char *buffer, unsigned size,
 /* ----------------------------------------------------------------------- */
 
 /* USB device number allocation bitmap */
+/* 地址映射表表示了一条总线上设备链接的情况。
+ * 4字节共128位的数组devicemap。每条总线上可以连接128个usb设备。
+ */
 struct usb_devmap {
 	unsigned long devicemap[128 / (8*sizeof(unsigned long))];
 };
@@ -502,7 +505,7 @@ struct usb3_lpm_parameters {
  * usb_set_device_state().
  */
 struct usb_device {
-	int		devnum;
+	int		devnum; //设备地址.USB设备在一条usb总线上的编号
 	char		devpath[16];
 	u32		route;
 	enum usb_device_state	state;
