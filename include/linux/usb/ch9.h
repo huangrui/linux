@@ -949,15 +949,15 @@ enum usb_device_state {
 	USB_STATE_NOTATTACHED = 0,
 
 	/* chapter 9 and authentication (wireless) device states */
-	USB_STATE_ATTACHED,
-	USB_STATE_POWERED,			/* wired */
+	USB_STATE_ATTACHED,			//设备已经连接到USB接口上
+	USB_STATE_POWERED,			/* wired */ //加电
 	USB_STATE_RECONNECTING,			/* auth */
 	USB_STATE_UNAUTHENTICATED,		/* auth */
 	USB_STATE_DEFAULT,			/* limited function */
-	USB_STATE_ADDRESS,
-	USB_STATE_CONFIGURED,			/* most functions */
+	USB_STATE_ADDRESS,			//表示主机分配了一个唯一的地址给设备
+	USB_STATE_CONFIGURED,			/* most functions */ //表示已被配置
 
-	USB_STATE_SUSPENDED
+	USB_STATE_SUSPENDED			//挂起，省电
 
 	/* NOTE:  there are actually four different SUSPENDED
 	 * states, returning to POWERED, DEFAULT, ADDRESS, or
