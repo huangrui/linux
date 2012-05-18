@@ -506,15 +506,19 @@ struct usb3_lpm_parameters {
  */
 struct usb_device {
 	int		devnum; //设备地址.USB设备在一条usb总线上的编号
-	char		devpath[16];
+	char		devpath[16]; /* ls /sys/bus/usb/devices/
+				      * 2-5:1.0表示2号总线的5号端口设备使用
+				      * 的是1号配置，接口号为0.（if是Hub）
+				      * 2-5.3:1.0 说明该Hub下3号端口的设备
+				      */
 	u32		route;
 	enum usb_device_state	state;
 	enum usb_device_speed	speed;
 
-	struct usb_tt	*tt;
+	struct usb_tt	*tt; // transaction translator高速和低速/全速的转换
 	int		ttport;
 
-	unsigned int toggle[2];
+	unsigned int toggle[2]; //对应IN和OUT端点
 
 	struct usb_device *parent;
 	struct usb_bus *bus;
