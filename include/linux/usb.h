@@ -518,27 +518,31 @@ struct usb_device {
 	struct usb_tt	*tt; // transaction translator高速和低速/全速的转换
 	int		ttport;
 
-	unsigned int toggle[2]; //对应IN和OUT端点
+	unsigned int toggle[2]; //对应IN和OUT端点, 其中1位表示DATA0还是DATA1
 
 	struct usb_device *parent;
 	struct usb_bus *bus;
-	struct usb_host_endpoint ep0;
+	struct usb_host_endpoint ep0; //断点0在创建结构体时就要初始化
 
 	struct device dev;
 
 	struct usb_device_descriptor descriptor;
 	struct usb_host_bos *bos;
-	struct usb_host_config *config;
+	struct usb_host_config *config; //设备拥有的所有配置
 
-	struct usb_host_config *actconfig;
-	struct usb_host_endpoint *ep_in[16];
+	struct usb_host_config *actconfig; //设备拥有的当前激活的配置
+	struct usb_host_endpoint *ep_in[16]; //15个in和15个out除端点0以外
 	struct usb_host_endpoint *ep_out[16];
 
-	char **rawdescriptors;
+	char **rawdescriptors; /* 字符数组，每一项都指向一个使用
+				* GET_DESCRIPTOR请求获得
+				* 设备通过默认控制管道响应主机请求，
+				* 标准的设备请求GET_DESCRIPTOR
+				*/
 
-	unsigned short bus_mA;
-	u8 portnum;
-	u8 level;
+	unsigned short bus_mA; //USB端口可以提供500mA的电流
+	u8 portnum; //端口号，设备插在Hub上面,RootHub此项为0
+	u8 level; //RootHub level为0,以下类推
 
 	unsigned can_submit:1;
 	unsigned persist_enabled:1;
@@ -560,14 +564,14 @@ struct usb_device {
 	struct list_head filelist;
 
 	int maxchild;
-	struct usb_device **children;
+	struct usb_device **children; //Hub接的端口
 
 	u32 quirks;
 	atomic_t urbnum;
 
 	unsigned long active_duration;
 
-#ifdef CONFIG_PM
+#ifdef CONFIG_PM //电源管理
 	unsigned long connect_time;
 
 	unsigned do_remote_wakeup:1;
