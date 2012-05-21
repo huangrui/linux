@@ -116,6 +116,7 @@ EXPORT_SYMBOL_GPL(usb_find_alt_setting);
  * Don't call this function unless you are bound to one of the interfaces
  * on this device or you have locked the device!
  */
+//获得某个接口号对应的struct usb_interface
 struct usb_interface *usb_ifnum_to_if(const struct usb_device *dev,
 				      unsigned ifnum)
 {

@@ -235,7 +235,10 @@ struct usb_interface_cache {
 	struct kref ref;		/* reference counter */
 
 	/* variable-length array of alternate settings for this interface,
-	 * stored in no particular order */
+	 * stored in no particular order
+	 * 可变长数组，GET_DESCRIPTOR的时候，内核就根据返回的每个接口可选
+	 * 配置的数目分配给intf_cache数组相应的空间，需要多少就分配多少。
+	 */
 	struct usb_host_interface altsetting[0];
 };
 #define	ref_to_usb_interface_cache(r) \
@@ -293,6 +296,7 @@ struct usb_host_config {
 
 	/* the interfaces associated with this configuration,
 	 * stored in no particular order */
+	// 配置所包含的接口。使用usb_ifnum_to_if()函数从接口号获得usb_interface
 	struct usb_interface *interface[USB_MAXINTERFACES];
 
 	/* Interface information available even when this is not the

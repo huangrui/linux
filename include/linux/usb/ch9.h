@@ -309,14 +309,23 @@ struct usb_device_descriptor {
  */
 struct usb_config_descriptor {
 	__u8  bLength;
-	__u8  bDescriptorType;
+	__u8  bDescriptorType; //USB_DT_CONFIG(0x02)或者USB_DT_OTHER_SPEED_CONFIG(0x07)
 
-	__le16 wTotalLength;
-	__u8  bNumInterfaces;
-	__u8  bConfigurationValue;
-	__u8  iConfiguration;
-	__u8  bmAttributes;
-	__u8  bMaxPower;
+	__le16 wTotalLength; //使用GET_DESCRIPTOR请求从设备获得配置信息返回长度
+	__u8  bNumInterfaces; //这个配置包含的接口数目
+	__u8  bConfigurationValue; /* 使用SET_CONFIG请求改变正在使用的USB配置
+				    * 同一时间却也只能有一个配置被激活
+				    */
+	__u8  iConfiguration; //描述配置信息的字符串描述符的索引值
+	__u8  bmAttributes; /* 表征配置的一些特点。bit6为1表示self-powered，bit5
+			     * 为1表示这个配置支持远程唤醒。
+			     * USB_CONFIG_ATT_ONE, USB_CONFIG_ATT_SELFPOWER
+			     * USB_CONFIG_ATT_WAKEUP, USB_CONFIG_ATT_BATTERY
+			     */
+	__u8  bMaxPower; /* 正常获得的最大电流值，2mA为单位。
+			  * (c->desc.bMaxPower * 2) is what the device requests and
+			  * udev->bus_mA is what the hub makes available.
+			  */
 } __attribute__ ((packed));
 
 #define USB_DT_CONFIG_SIZE		9
