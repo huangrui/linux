@@ -250,21 +250,23 @@ struct usb_descriptor_header {
 
 /* USB_DT_DEVICE: Device descriptor */
 struct usb_device_descriptor {
-	__u8  bLength;
-	__u8  bDescriptorType;
+	__u8  bLength; //描述符长度
+	__u8  bDescriptorType; //USB_DT_DEVICE, 0x01
 
-	__le16 bcdUSB;
+	__le16 bcdUSB; // USB spec的版本号,高速->0200H
 	__u8  bDeviceClass;
 	__u8  bDeviceSubClass;
 	__u8  bDeviceProtocol;
-	__u8  bMaxPacketSize0;
-	__le16 idVendor;
-	__le16 idProduct;
-	__le16 bcdDevice;
-	__u8  iManufacturer;
-	__u8  iProduct;
-	__u8  iSerialNumber;
-	__u8  bNumConfigurations;
+	__u8  bMaxPacketSize0; /* 端点0一次可以处理的最大字节数
+				* 只能是8, 16, 32, 64四者之一
+				*/
+	__le16 idVendor; //厂商的ID
+	__le16 idProduct; //产品的ID
+	__le16 bcdDevice; //设备的版本号
+	__u8  iManufacturer; //厂商
+	__u8  iProduct; //产品
+	__u8  iSerialNumber; //序列号
+	__u8  bNumConfigurations; //当前速度模式下支持的配置数量
 } __attribute__ ((packed));
 
 #define USB_DT_DEVICE_SIZE		18
