@@ -995,14 +995,18 @@ struct usbdrv_wrap {
  * well as forcing all pending I/O requests to complete (by unlinking
  * them as necessary, and blocking until the unlinks complete).
  */
+// 平时所谓的编写USB驱动指的是USB接口的驱动，以设备的接口提供的功能为基础
 struct usb_driver {
-	const char *name;
+	const char *name; // 对应/sys/bus/usb/drivers/下子目录的名称
 
+	//看USB驱动是否愿意接受某个接口的函数
 	int (*probe) (struct usb_interface *intf,
 		      const struct usb_device_id *id);
 
+	//当接口失去联系，或使用rmmod卸载驱动强行分开时这个函数会被调用
 	void (*disconnect) (struct usb_interface *intf);
 
+	//当驱动有通过usbfs和用户空间交流的需要时就使用它
 	int (*unlocked_ioctl) (struct usb_interface *intf, unsigned int code,
 			void *buf);
 
@@ -1013,10 +1017,15 @@ struct usb_driver {
 	int (*pre_reset)(struct usb_interface *intf);
 	int (*post_reset)(struct usb_interface *intf);
 
+	//驱动所支持的所有设备的花名册
 	const struct usb_device_id *id_table;
 
+	/* 支持动态id, 只要新id代表的设备存在就可以添加新id
+	 * echo 0557 2008 > /sys/bus/usb/drivers/foo_driver/new_id
+	 */
 	struct usb_dynids dynids;
 	struct usbdrv_wrap drvwrap;
+	//禁止动态id
 	unsigned int no_dynamic_id:1;
 	unsigned int supports_autosuspend:1;
 	unsigned int disable_hub_initiated_lpm:1;
@@ -1046,6 +1055,7 @@ struct usb_driver {
 struct usb_device_driver {
 	const char *name;
 
+	//没有设备花名册，来者不拒，接受所有设备
 	int (*probe) (struct usb_device *udev);
 	void (*disconnect) (struct usb_device *udev);
 

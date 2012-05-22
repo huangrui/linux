@@ -233,6 +233,7 @@ static int generic_resume(struct usb_device *udev, pm_message_t msg)
 
 #endif	/* CONFIG_PM */
 
+//在usb_init的时候就已经注册给usb子系统了
 struct usb_device_driver usb_generic_driver = {
 	.name =	"usb",
 	.probe = generic_probe,

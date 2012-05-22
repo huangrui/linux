@@ -762,6 +762,7 @@ static int usb_device_match(struct device *dev, struct device_driver *drv)
 
 		/* interface drivers never match devices */
 		if (!is_usb_device_driver(drv))
+			/* 一个usb接口对应一个usb驱动 */
 			return 0;
 
 		/* TODO: Add real matching code */
