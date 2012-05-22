@@ -371,6 +371,10 @@ struct usb_device *usb_alloc_dev(struct usb_device *parent,
 				 struct usb_bus *bus, unsigned port1)
 {
 	struct usb_device *dev;
+	/* USB的世界里一个主机控制器对应一条usb总线
+	 * 主机控制器的驱动用struct usb_hcd结构表示
+	 * 一条总线用struct usb_bus结构表示
+	 */
 	struct usb_hcd *usb_hcd = container_of(bus, struct usb_hcd, self);
 	unsigned root_hub = 0;
 
@@ -378,6 +382,11 @@ struct usb_device *usb_alloc_dev(struct usb_device *parent,
 	if (!dev)
 		return NULL;
 
+	/* bus_to_hcd是为了获得总线对应的主机控制器的驱动usb_hcd
+	 * usb_get_hcd只是将得到的这个usb_hcd结构对象的引用计数加1.
+	 * 因为总线上多了一个设备，设备在主机控制器的数据结构就得在，并为其
+	 * 增加引用计数
+	 */
 	if (!usb_get_hcd(bus_to_hcd(bus))) {
 		kfree(dev);
 		return NULL;
@@ -390,20 +399,24 @@ struct usb_device *usb_alloc_dev(struct usb_device *parent,
 		return NULL;
 	}
 
-	device_initialize(&dev->dev);
+	device_initialize(&dev->dev); //将usb_device中嵌入的struct device初始化
 	dev->dev.bus = &usb_bus_type;
 	dev->dev.type = &usb_device_type;
 	dev->dev.groups = usb_device_groups;
-	dev->dev.dma_mask = bus->controller->dma_mask;
+	dev->dev.dma_mask = bus->controller->dma_mask; //看主控制器是否支持DMA传输
 	set_dev_node(&dev->dev, dev_to_node(bus->controller));
-	dev->state = USB_STATE_ATTACHED;
+	dev->state = USB_STATE_ATTACHED; //表示设备已经连接到usb接口上
 	dev->lpm_disable_count = 1;
 	atomic_set(&dev->urbnum, 0);
 
+	/* 端点0非常特殊，struct usb_device里ep0的urb_list给初始化掉
+	 * 并初始化了端点0的描述符长度和描述符类型
+	 */
 	INIT_LIST_HEAD(&dev->ep0.urb_list);
 	dev->ep0.desc.bLength = USB_DT_ENDPOINT_SIZE;
 	dev->ep0.desc.bDescriptorType = USB_DT_ENDPOINT;
 	/* ep0 maxpacket comes later, from device descriptor */
+	// 使ep_in和ep_out指针数组的第一个成员指向ep0, ep_in[0]和ep_out[0]表示端点0
 	usb_enable_endpoint(dev, &dev->ep0, false);
 	dev->can_submit = 1;
 
@@ -414,6 +427,10 @@ struct usb_device *usb_alloc_dev(struct usb_device *parent,
 	 * are often labeled with these port numbers.  The name isn't
 	 * as stable:  bus->busnum changes easily from modprobe order,
 	 * cardbus or pci hotplugging, and so on.
+	 */
+	/* unlikely(x)告诉编译器条件x发生的可能性不大，那么这个条件块里语句的目标码
+	 * 可能就会被放在一个比较远的位置，以保证经常执行的目标码更加紧凑
+	 * usb设备直接连到root hub上的可能性很小
 	 */
 	if (unlikely(!parent)) {
 		dev->devpath[0] = '0';
