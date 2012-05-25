@@ -1360,11 +1360,17 @@ typedef void (*usb_complete_t)(struct urb *);
  * when the urb is owned by the hcd, that is, since the call to
  * usb_submit_urb() till the entry into the completion routine.
  */
+// usb request block
 struct urb {
 	/* private: usb core and host controller only fields in the urb */
 	struct kref kref;		/* reference count of the URB */
+	//urb中主机控制器的自留地
 	void *hcpriv;			/* private data for host controller */
+	//用于终止urb同步等待中usb_kill_urb()中判断为0是终止
 	atomic_t use_count;		/* concurrent submissions counter */
+	/* 如果reject大于0，就调用wake_up唤醒在usb_kill_urb_queue上休息的
+	 * usb_kill_urb。同步与互斥
+	 */
 	atomic_t reject;		/* submissions will fail */
 	int unlinked;			/* unlink error code */
 

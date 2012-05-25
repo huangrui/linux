@@ -177,11 +177,16 @@
  * such requests may be made at any time.
  */
 struct usb_ctrlrequest {
+	/* bit7表示控制传输中DATA transaction阶段的方向，bit5-6表示request的类型,
+	 * 是标准的，class-specific的还是vendor-specific的。bit0-4表示了这个请求
+	 * 针对的是设备，接口还是端点。ch9.h中有一批掩码USB directions, types,
+	 * recipients
+	 */
 	__u8 bRequestType;
-	__u8 bRequest;
-	__le16 wValue;
-	__le16 wIndex;
-	__le16 wLength;
+	__u8 bRequest; //具体是哪个request
+	__le16 wValue; //request的参数
+	__le16 wIndex; //request的参数
+	__le16 wLength; //DATA transaction阶段的长度
 } __attribute__ ((packed));
 
 /*-------------------------------------------------------------------------*/
