@@ -618,8 +618,10 @@ EXPORT_SYMBOL_GPL(usb_unlink_urb);
  * This routine should not be called by a driver after its disconnect
  * method has returned.
  */
+//不能用在中断上下文，必须能够休眠将自己占的资源给让出来
 void usb_kill_urb(struct urb *urb)
 {
+	//判断一下这个函数是不是处在能够休眠的情况,是则打印堆栈信息
 	might_sleep();
 	if (!(urb && urb->dev && urb->ep))
 		return;
