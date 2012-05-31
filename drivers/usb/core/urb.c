@@ -628,6 +628,9 @@ void usb_kill_urb(struct urb *urb)
 	atomic_inc(&urb->reject);
 
 	usb_hcd_unlink_urb(urb, -ENOENT);
+	/* wait_event宏是用来实现休眠, usb_kill_urb_queue是等待队列
+	 * 后面则是唤醒条件是use_count为0
+	 */
 	wait_event(usb_kill_urb_queue, atomic_read(&urb->use_count) == 0);
 
 	atomic_dec(&urb->reject);
