@@ -1375,12 +1375,20 @@ struct urb {
 	int unlinked;			/* unlink error code */
 
 	/* public: documented fields in the urb that can be used by drivers */
+	/* HCD每收到一个urb，就会将它添加到这个urb指定的那个端点的urb队列里去
+	 * 链表的表头是端点里面的struct list_head的结构体成员
+	 */
 	struct list_head urb_list;	/* list head for use by the urb's
 					 * current owner */
 	struct list_head anchor_list;	/* the URB may be anchored */
 	struct usb_anchor *anchor;
+	//urb要去的那个设备
 	struct usb_device *dev;		/* (in) pointer to associated device */
 	struct usb_host_endpoint *ep;	/* (internal) pointer to endpoint */
+	/* urb到达端点之前，需要经过一个通往端点的管道pipe。
+	 * 一端是主机上的缓冲区，一端是设备上的端点
+	 * pipe需要知道两端的地址，方向和类型
+	 */
 	unsigned int pipe;		/* (in) pipe information */
 	unsigned int stream_id;		/* (in) stream ID */
 	int status;			/* (return) non-ISO status */
@@ -1696,6 +1704,7 @@ void usb_sg_wait(struct usb_sg_request *io);
 
 /* NOTE:  these are not the standard USB_ENDPOINT_XFER_* values!! */
 /* (yet ... they're the values used by usbfs) */
+//管道
 #define PIPE_ISOCHRONOUS		0
 #define PIPE_INTERRUPT			1
 #define PIPE_CONTROL			2
