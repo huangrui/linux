@@ -35,6 +35,7 @@ static struct kset *system_kset;
 static int __must_check bus_rescan_devices_helper(struct device *dev,
 						void *data);
 
+//Rui is watching here
 static struct bus_type *bus_get(struct bus_type *bus)
 {
 	if (bus) {
