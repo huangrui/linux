@@ -152,6 +152,7 @@ static int xhci_pci_probe(struct pci_dev *dev, const struct pci_device_id *id)
 	struct hc_driver *driver;
 	struct usb_hcd *hcd;
 
+	// 这里的driver_data是指xhci_pci_hc_driver
 	driver = (struct hc_driver *)id->driver_data;
 	/* Register the USB 2.0 roothub.
 	 * FIXME: USB core must know to register the USB 2.0 roothub first.
