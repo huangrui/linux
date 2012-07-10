@@ -4539,16 +4539,19 @@ static int __init xhci_hcd_init(void)
 {
 	int retval;
 
+	printk(KERN_DEBUG "Rui is watching here.\n");
 	retval = xhci_register_pci();
 	if (retval < 0) {
 		printk(KERN_DEBUG "Problem registering PCI driver.");
 		return retval;
 	}
+	printk(KERN_DEBUG "Rui is after register pci.\n");
 	retval = xhci_register_plat();
 	if (retval < 0) {
 		printk(KERN_DEBUG "Problem registering platform driver.");
 		goto unreg_pci;
 	}
+	printk(KERN_DEBUG "Rui is after register platform.\n");
 	/*
 	 * Check the compiler generated sizes of structures that must be laid
 	 * out in specific ways for hardware access.

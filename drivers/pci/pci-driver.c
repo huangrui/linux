@@ -1151,6 +1151,7 @@ int __pci_register_driver(struct pci_driver *drv, struct module *owner,
 	INIT_LIST_HEAD(&drv->dynids.list);
 
 	/* register with core */
+	printk(KERN_DEBUG "Rui is before driver_register.\n");
 	error = driver_register(&drv->driver);
 	if (error)
 		goto out;

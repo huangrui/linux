@@ -174,6 +174,7 @@ int driver_register(struct device_driver *drv)
 		printk(KERN_WARNING "Driver '%s' needs updating - please use "
 			"bus_type methods\n", drv->name);
 
+	printk(KERN_DEBUG "Rui is before driver_find.\n");
 	other = driver_find(drv->name, drv->bus);
 	if (other) {
 		printk(KERN_ERR "Error: Driver '%s' is already registered, "
@@ -181,6 +182,7 @@ int driver_register(struct device_driver *drv)
 		return -EBUSY;
 	}
 
+	printk(KERN_DEBUG "Rui is before bus_add_driver.\n");
 	ret = bus_add_driver(drv);
 	if (ret)
 		return ret;
