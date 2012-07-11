@@ -270,6 +270,7 @@ static int really_probe(struct device *dev, struct device_driver *drv)
 		printk(KERN_DEBUG "Rui is before device_bus_probe, the name is %s, the device name is %s.\n",
 				dev->bus->name, dev->bus->dev_name);
 		ret = dev->bus->probe(dev);
+		printk(KERN_DEBUG "Rui is after device_bus_probe");
 		if (ret)
 			goto probe_failed;
 	} else if (drv->probe) {
