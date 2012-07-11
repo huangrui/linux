@@ -2465,6 +2465,7 @@ int usb_add_hcd(struct usb_hcd *hcd,
 	/* "reset" is misnamed; its role is now one-time init. the controller
 	 * should already have been reset (and boot firmware kicked off etc).
 	 */
+	// 此处调用reset成员函数
 	if (hcd->driver->reset && (retval = hcd->driver->reset(hcd)) < 0) {
 		dev_err(hcd->self.controller, "can't setup\n");
 		goto err_hcd_driver_setup;
@@ -2486,6 +2487,7 @@ int usb_add_hcd(struct usb_hcd *hcd,
 	}
 
 	hcd->state = HC_STATE_RUNNING;
+	// 此处调用start成员函数
 	retval = hcd->driver->start(hcd);
 	if (retval < 0) {
 		dev_err(hcd->self.controller, "startup error %d\n", retval);
