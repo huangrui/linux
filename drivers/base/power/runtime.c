@@ -1021,18 +1021,22 @@ int pm_runtime_barrier(struct device *dev)
 {
 	int retval = 0;
 
+	printk(KERN_DEBUG "Rui is before pm_runtime_get_noresume");
 	pm_runtime_get_noresume(dev);
 	spin_lock_irq(&dev->power.lock);
 
 	if (dev->power.request_pending
 	    && dev->power.request == RPM_REQ_RESUME) {
+		printk(KERN_DEBUG "Rui is before pm_resume");
 		rpm_resume(dev, 0);
 		retval = 1;
 	}
 
+	printk(KERN_DEBUG "Rui is before __pm_runtime_barrier");
 	__pm_runtime_barrier(dev);
 
 	spin_unlock_irq(&dev->power.lock);
+	printk(KERN_DEBUG "Rui is before pm_runtime_put_noidle");
 	pm_runtime_put_noidle(dev);
 
 	return retval;

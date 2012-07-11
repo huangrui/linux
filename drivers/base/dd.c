@@ -258,24 +258,29 @@ static int really_probe(struct device *dev, struct device_driver *drv)
 	WARN_ON(!list_empty(&dev->devres_head));
 
 	dev->driver = drv;
+	printk(KERN_DEBUG "Rui is before driver_sysfs_add");
 	if (driver_sysfs_add(dev)) {
 		printk(KERN_ERR "%s: driver_sysfs_add(%s) failed\n",
 			__func__, dev_name(dev));
 		goto probe_failed;
 	}
 
+	printk(KERN_DEBUG "Rui is before dev->bus->probe");
 	if (dev->bus->probe) {
+		printk(KERN_DEBUG "Rui is before device_bus_probe, the name is %s, the device name is %s.\n",
+				dev->bus->name, dev->bus->dev_name);
 		ret = dev->bus->probe(dev);
 		if (ret)
 			goto probe_failed;
 	} else if (drv->probe) {
-		printk(KERN_DEBUG "Rui is before driver_probe, the name is %s.\n",
+		printk(KERN_DEBUG "Rui is before device_driver_probe, the name is %s.\n",
 				drv->name);
 		ret = drv->probe(dev);
 		if (ret)
 			goto probe_failed;
 	}
 
+	printk(KERN_DEBUG "Rui is before driver_bound");
 	driver_bound(dev);
 	ret = 1;
 	pr_debug("bus: '%s': %s: bound device %s to driver %s\n",
@@ -360,8 +365,11 @@ int driver_probe_device(struct device_driver *drv, struct device *dev)
 	pr_debug("bus: '%s': %s: matched device %s with driver %s\n",
 		 drv->bus->name, __func__, dev_name(dev), drv->name);
 
+	printk(KERN_DEBUG "Rui is before pm_runtime_get_noresume");
 	pm_runtime_get_noresume(dev);
+	printk(KERN_DEBUG "Rui is before pm_runtime_barrier");
 	pm_runtime_barrier(dev);
+	printk(KERN_DEBUG "Rui is before really_probe");
 	ret = really_probe(dev, drv);
 	pm_runtime_put_sync(dev);
 
@@ -434,14 +442,17 @@ static int __driver_attach(struct device *dev, void *data)
 	 * is an error.
 	 */
 
+	printk(KERN_DEBUG "Rui is __driver_attach before match");
 	if (!driver_match_device(drv, dev))
 		return 0;
 
 	if (dev->parent)	/* Needed for USB */
 		device_lock(dev->parent);
 	device_lock(dev);
-	if (!dev->driver)
+	if (!dev->driver) {
+		printk(KERN_DEBUG "Rui is __driver_attach before driver_probe_device");
 		driver_probe_device(drv, dev);
+	}
 	device_unlock(dev);
 	if (dev->parent)
 		device_unlock(dev->parent);
