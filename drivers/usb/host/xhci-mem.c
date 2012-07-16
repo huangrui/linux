@@ -2263,6 +2263,7 @@ int xhci_mem_init(struct xhci_hcd *xhci, gfp_t flags)
 	int i;
 
 	page_size = xhci_readl(xhci, &xhci->op_regs->page_size);
+	printk(KERN_DEBUG "Ray, the page size is %d.\n", page_size);
 	xhci_dbg(xhci, "Supported page size register = 0x%x\n", page_size);
 	for (i = 0; i < 16; i++) {
 		if ((0x1 & page_size) != 0)

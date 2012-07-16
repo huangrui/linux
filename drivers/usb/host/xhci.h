@@ -892,6 +892,7 @@ struct xhci_interval_bw_table {
 };
 
 
+// Devcie Context 数据结构
 struct xhci_virt_device {
 	struct usb_device		*udev;
 	/*
