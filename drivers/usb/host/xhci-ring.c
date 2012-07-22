@@ -2498,6 +2498,7 @@ hw_died:
 	return IRQ_HANDLED;
 }
 
+// xhci msi的中断处理函数
 irqreturn_t xhci_msi_irq(int irq, struct usb_hcd *hcd)
 {
 	return xhci_irq(hcd);
