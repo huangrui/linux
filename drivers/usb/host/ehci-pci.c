@@ -108,6 +108,11 @@ static int ehci_pci_setup(struct usb_hcd *hcd)
 
 	if ((pdev->vendor == PCI_VENDOR_ID_AMD && pdev->device == 0x7808) ||
 	    (pdev->vendor == PCI_VENDOR_ID_ATI && pdev->device == 0x4396)) {
+		/* EHCI controller on AMD SB600/SB700/SB800/Hudson-3 platforms need
+		 * extend vaid time of handshake.
+		 */
+		ehci->amd_extend_ass = 1;
+
 		/* EHCI controller on AMD SB700/SB800/Hudson-2/3 platforms may
 		 * read/write memory space which does not belong to it when
 		 * there is NULL pointer with T-bit set to 1 in the frame list

@@ -369,17 +369,28 @@ static void ehci_quiesce (struct ehci_hcd *ehci)
 
 	/* wait for any schedule enables/disables to take effect */
 	temp = (ehci->command << 10) & (STS_ASS | STS_PSS);
-	if (handshake_on_error_set_halt(ehci, &ehci->regs->status,
-					STS_ASS | STS_PSS, temp, 16 * 125))
-		return;
+	if (ehci->amd_extend_ass) {
+		if (handshake_on_error_set_halt(ehci, &ehci->regs->status,
+				STS_ASS | STS_PSS, temp, 320 * 125))
+			return;
+	}
+	else {
+		if (handshake_on_error_set_halt(ehci, &ehci->regs->status,
+				STS_ASS | STS_PSS, temp, 16 * 125))
+			return;
+	}
 
 	/* then disable anything that's still active */
 	ehci->command &= ~(CMD_ASE | CMD_PSE);
 	ehci_writel(ehci, ehci->command, &ehci->regs->command);
 
 	/* hardware can take 16 microframes to turn off ... */
-	handshake_on_error_set_halt(ehci, &ehci->regs->status,
-				    STS_ASS | STS_PSS, 0, 16 * 125);
+	if (ehci->amd_extend_ass)
+		handshake_on_error_set_halt(ehci, &ehci->regs->status,
+				STS_ASS | STS_PSS, 0, 320 * 125);
+	else
+		handshake_on_error_set_halt(ehci, &ehci->regs->status,
+				STS_ASS | STS_PSS, 0, 16 * 125);
 }
 
 /*-------------------------------------------------------------------------*/
