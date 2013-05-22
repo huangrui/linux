@@ -347,6 +347,58 @@
 #define DWC3_DEPCMD_TYPE_BULK		2
 #define DWC3_DEPCMD_TYPE_INTR		3
 
+/* OTG Event Register */
+#define DWC3_OEVT_DEVICEMODE            (1 << 31)
+#define DWC3_OEVT_XHCIRUNSTPSET         (1 << 27)
+#define DWC3_OEVT_DEVRUNSTPSET          (1 << 26)
+#define DWC3_OEVT_HIBENTRY              (1 << 25)
+#define DWC3_OEVT_IDSTSCHNG             (1 << 24)
+#define DWC3_OEVT_HRRCONFNOTIF          (1 << 23)
+#define DWC3_OEVT_HRRINITNOTIF          (1 << 22)
+#define DWC3_OEVT_ADEVIDLE              (1 << 21)
+#define DWC3_OEVT_ADEVBHOSTEND          (1 << 20)
+#define DWC3_OEVT_ADEVHOST              (1 << 19)
+#define DWC3_OEVT_ADEVHNPCHNG           (1 << 18)
+#define DWC3_OEVT_ADEVSRPDET            (1 << 17)
+#define DWC3_OEVT_ADEVSESSENDDET        (1 << 16)
+#define DWC3_OEVT_BDEVBHOSTEND          (1 << 11)
+#define DWC3_OEVT_BDEVHNPCHNG           (1 << 10)
+#define DWC3_OEVT_BDEVSESSVLDDET        (1 << 9)
+#define DWC3_OEVT_BDEVVBUSCHNG          (1 << 8)
+#define DWC3_OEVT_BSESSVLD              (1 << 3)
+#define DWC3_OEVT_HOSTNEGSTS            (1 << 2)
+#define DWC3_OEVT_SESSREQSTS            (1 << 1)
+#define DWC3_OEVT_ERR                   (1 << 0)
+
+
+/* OTG Event Enable Register */
+#define DWC3_OEVTEN_XHCIRUNSTPSETEN     (1 << 27)
+#define DWC3_OEVTEN_DEVRUNSTPSETEN      (1 << 26)
+#define DWC3_OEVTEN_HIBENTRYEN          (1 << 25)
+#define DWC3_OEVTEN_CONIDSTSCHNGEN      (1 << 24)
+#define DWC3_OEVTEN_HRRCONFNOTIFEN      (1 << 23)
+#define DWC3_OEVTEN_HRRINITNOTIFEN      (1 << 22)
+#define DWC3_OEVTEN_ADEVIDLEEN          (1 << 21)
+#define DWC3_OEVTEN_ADEVBHOSTENDEN      (1 << 20)
+#define DWC3_OEVTEN_ADEVHOSTEN          (1 << 19)
+#define DWC3_OEVTEN_ADEVHNPCHNGEN       (1 << 18)
+#define DWC3_OEVTEN_ADEVSRPDETEN        (1 << 17)
+#define DWC3_OEVTEN_ADEVSESSENDDETEN    (1 << 16)
+#define DWC3_OEVTEN_BDEVHOSTENDEN       (1 << 11)
+#define DWC3_OEVTEN_BDEVHNPCHNGEN       (1 << 10)
+#define DWC3_OEVTEN_BDEVSESSVLDDETEN    (1 << 9)
+#define DWC3_OEVTEN_BDEVVBUSCHNGEVNTEN  (1 << 8)
+
+/* OTG CTL Register */
+#define DWC3_OCTL_OTG3GOERR		(1 << 7)
+#define DWC3_OCTL_PERIMODE		(1 << 6)
+#define DWC3_OCTL_PRTPWRCTL		(1 << 5)
+#define DWC3_OCTL_HNPREQ		(1 << 4)
+#define DWC3_OCTL_SESREQ		(1 << 3)
+#define DWC3_OCTL_TERMSELIDPULSE	(1 << 2)
+#define DWC3_OCTL_DEVSETHNPEN		(1 << 1)
+#define DWC3_OCTL_HOSTSETHNPEN		(1 << 0)
+
 /* Structures */
 
 struct dwc3_trb;
@@ -617,6 +669,9 @@ struct dwc3_scratchpad_array {
  * @usb3_phy: pointer to USB3 PHY
  * @dcfg: saved contents of DCFG register
  * @gctl: saved contents of GCTL register
+ * @dcbaap: for caching host side register
+ * @erdp: for caching host side register
+ * @erstba: for caching host side register
  * @is_selfpowered: true when we are selfpowered
  * @three_stage_setup: set if we perform a three phase setup
  * @ep0_bounced: true when we used bounce buffer
@@ -675,6 +730,10 @@ struct dwc3 {
 	/* used for suspend/resume */
 	u32			dcfg;
 	u32			gctl;
+
+	u32			dcbaap;		/* depcmdpar2(2)*/
+	u32			erdp;		/* depcmdpar0(4)*/
+	u32			erstba;		/* depcmdpar2(4)*/
 
 	u32			num_event_buffers;
 	u32			u1u2;
