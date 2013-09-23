@@ -2398,6 +2398,7 @@ usbtest_probe(struct usb_interface *intf, const struct usb_device_id *id)
 
 	udev = interface_to_usbdev(intf);
 
+	dev_info(&intf->dev, "%s, is probing\n", __func__);
 #ifdef	GENERIC
 	/* specify devices by module parameters? */
 	if (id->match_flags == 0) {
@@ -2681,7 +2682,7 @@ static int __init usbtest_init(void)
 {
 #ifdef GENERIC
 	if (vendor)
-		pr_debug("params: vend=0x%04x prod=0x%04x\n", vendor, product);
+		pr_info("params: vend=0x%04x prod=0x%04x\n", vendor, product);
 #endif
 	return usb_register(&usbtest_driver);
 }
