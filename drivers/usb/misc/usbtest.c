@@ -33,6 +33,16 @@ struct usbtest_param {
 };
 #define USBTEST_REQUEST	_IOWR('U', 100, struct usbtest_param)
 
+static void dump_usbtest_param(struct usbtest_param *param, struct device *dev)
+{
+	dev_info(dev, "Dump usbtest_param:\n");
+	dev_info(dev, "\ttest_num: %d\n", param->test_num);
+	dev_info(dev, "\titerations: %d\n", param->iterations);
+	dev_info(dev, "\tlength: %d\n", param->length);
+	dev_info(dev, "\tvary: %d\n", param->vary);
+	dev_info(dev, "\tsglen: %d\n", param->sglen);
+}
+
 /*-------------------------------------------------------------------------*/
 
 #define	GENERIC		/* let probe() bind using module params */
@@ -79,6 +89,28 @@ struct usbtest_dev {
 static struct usb_device *testdev_to_usbdev(struct usbtest_dev *test)
 {
 	return interface_to_usbdev(test->intf);
+}
+
+static void dump_usbtest_dev(struct usbtest_dev *test)
+{
+	struct device *dev;
+	if (!test)
+		return;
+
+	dev = &testdev_to_usbdev(test)->dev;
+	dev_info(dev, "Dump usbtest_dev:\n");
+	dev_info(dev, "\ttest_info:\n");
+	dev_info(dev, "\t\tname: %s\n", test->info->name);
+	dev_info(dev, "\t\tep_in: %d\n", test->info->ep_in);
+	dev_info(dev, "\t\tep_out: %d\n", test->info->ep_out);
+	dev_info(dev, "\t\tautoconf: %d\n", test->info->autoconf);
+	dev_info(dev, "\t\tctrl_out: %d\n", test->info->ctrl_out);
+	dev_info(dev, "\t\tiso: %d\n", test->info->iso);
+	dev_info(dev, "\t\talt: %d\n", test->info->alt);
+	dev_info(dev, "\tin_pipe: %d\n", test->in_pipe);
+	dev_info(dev, "\tout_pipe: %d\n", test->out_pipe);
+	dev_info(dev, "\tin_iso_pipe: %d\n", test->in_iso_pipe);
+	dev_info(dev, "\tout_iso_pipe: %d\n", test->out_iso_pipe);
 }
 
 /* set up all urbs so they can be used with either bulk or interrupt */
@@ -585,6 +617,10 @@ static int is_good_config(struct usbtest_dev *tdev, int len)
 			return 0;
 		}
 		/* this bit 'must be 1' but often isn't */
+		dev_info(&testdev_to_usbdev(tdev)->dev, "Ray: In is_good_config: realworld=%d\n",
+				realworld);
+		dev_info(&testdev_to_usbdev(tdev)->dev, "Ray: In is_good_config: bmAttributes=0x%x\n",
+				config->bmAttributes);
 		if (!realworld && !(config->bmAttributes & 0x80)) {
 			ERROR(tdev, "high bit of config attributes not set\n");
 			return 0;
@@ -700,10 +736,13 @@ static int ch9_postconfig(struct usbtest_dev *dev)
 	/* [9.2.3] if there's more than one altsetting, we need to be able to
 	 * set and get each one.  mostly trusts the descriptors from usbcore.
 	 */
+	dev_info(&udev->dev, "%s is calling\n", __func__);
+	dev_info(&udev->dev, "Ray: num_altsetting is %d\n", iface->num_altsetting);
 	for (i = 0; i < iface->num_altsetting; i++) {
 
 		/* 9.2.3 constrains the range here */
 		alt = iface->altsetting[i].desc.bAlternateSetting;
+		dev_info(&udev->dev, "Ray: i=%d, alt=%d\n", i, alt);
 		if (alt < 0 || alt >= iface->num_altsetting) {
 			dev_err(&iface->dev,
 					"invalid alt [%d].bAltSetting = %d\n",
@@ -724,6 +763,7 @@ static int ch9_postconfig(struct usbtest_dev *dev)
 
 		/* [9.4.4] get_interface always works */
 		retval = get_altsetting(dev);
+		dev_info(&udev->dev, "Ray: retval=%d, alt=%d\n", retval, alt);
 		if (retval != alt) {
 			dev_err(&iface->dev, "get alt should be %d, was %d\n",
 					alt, retval);
@@ -733,9 +773,13 @@ static int ch9_postconfig(struct usbtest_dev *dev)
 	}
 
 	/* [real world] get_config unimplemented if there's only one */
+	dev_info(&udev->dev, "Ray: realworld=%d\n", realworld);
 	if (!realworld || udev->descriptor.bNumConfigurations != 1) {
 		int	expected = udev->actconfig->desc.bConfigurationValue;
 
+		dev_info(&udev->dev, "Ray: Get Configuration\n");
+		dev_info(&udev->dev, "Ray: ConfigurationNum=%d\n",
+				udev->descriptor.bNumConfigurations);
 		/* [9.4.2] get_configuration always works
 		 * ... although some cheap devices (like one TI Hub I've got)
 		 * won't return config descriptors except before set_config.
@@ -860,6 +904,7 @@ static int ch9_postconfig(struct usbtest_dev *dev)
 	}
 
 	/* and sometimes [9.2.6.6] speed dependent descriptors */
+	dev_info(&iface->dev, "Ray: bcdUSB=%x\n", udev->descriptor.bcdUSB);
 	if (le16_to_cpu(udev->descriptor.bcdUSB) == 0x0200) {
 		struct usb_qualifier_descriptor *d = NULL;
 
@@ -1960,6 +2005,8 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 
 	pattern = mod_pattern;
 
+	dev_info(&intf->dev, "%s, is calling by Ray\n", __func__);
+	dev_info(&intf->dev, "Ray: code is %x\n", code);
 	if (code != USBTEST_REQUEST)
 		return -EOPNOTSUPP;
 
@@ -2002,6 +2049,8 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 	 * queueing, concurrent read+write threads, and so on.
 	 */
 	do_gettimeofday(&start);
+	dump_usbtest_param(param, &intf->dev);
+	dump_usbtest_dev(dev);
 	switch (param->test_num) {
 
 	case 0:
@@ -2150,7 +2199,9 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 		dev_info(&intf->dev,
 			"TEST 9:  ch9 (subset) control tests, %d times\n",
 				param->iterations);
-		for (i = param->iterations; retval == 0 && i--; /* NOP */)
+		/* Update to 1 time for debug */
+		//for (i = param->iterations; retval == 0 && i--; /* NOP */)
+		for (i = 1; retval == 0 && i--; /* NOP */)
 			retval = ch9_postconfig(dev);
 		if (retval)
 			dev_err(&intf->dev, "ch9 subset failed, "
