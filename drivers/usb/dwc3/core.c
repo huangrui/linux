@@ -379,6 +379,7 @@ static int dwc3_probe(struct platform_device *pdev)
 
 	u8			mode;
 
+	dev_info(dev, "Ray: %s enter into driver binding core\n", __func__);
 	mem = devm_kzalloc(dev, sizeof(*dwc) + DWC3_ALIGN_MASK, GFP_KERNEL);
 	if (!mem) {
 		dev_err(dev, "not enough memory\n");

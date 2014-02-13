@@ -122,6 +122,7 @@ static int dwc3_pci_probe(struct pci_dev *pci,
 	int			ret = -ENOMEM;
 	struct device		*dev = &pci->dev;
 
+	dev_info(dev, "Ray: %s enter into driver binding pci\n", __func__);
 	glue = devm_kzalloc(dev, sizeof(*glue), GFP_KERNEL);
 	if (!glue) {
 		dev_err(dev, "not enough memory\n");
