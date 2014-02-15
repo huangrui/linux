@@ -74,6 +74,7 @@ void dwc3_set_mode(struct dwc3 *dwc, u32 mode)
 	reg &= ~(DWC3_GCTL_PRTCAPDIR(DWC3_GCTL_PRTCAP_OTG));
 	reg |= DWC3_GCTL_PRTCAPDIR(mode);
 	dwc3_writel(dwc->regs, DWC3_GCTL, reg);
+	dev_info(dwc->dev, "Ray, set after mode reg=0x%x\n", dwc3_readl(dwc->regs, DWC3_GCTL));
 }
 
 /**
@@ -99,8 +100,8 @@ static void dwc3_core_soft_reset(struct dwc3 *dwc)
 	reg |= DWC3_GUSB2PHYCFG_PHYSOFTRST;
 	dwc3_writel(dwc->regs, DWC3_GUSB2PHYCFG(0), reg);
 
-	usb_phy_init(dwc->usb2_phy);
-	usb_phy_init(dwc->usb3_phy);
+	//usb_phy_init(dwc->usb2_phy);
+	//usb_phy_init(dwc->usb3_phy);
 	mdelay(100);
 
 	/* Clear USB3 PHY reset */
@@ -121,6 +122,16 @@ static void dwc3_core_soft_reset(struct dwc3 *dwc)
 	dwc3_writel(dwc->regs, DWC3_GCTL, reg);
 }
 
+static void dwc3_core_soft_reset_by_amd(struct dwc3 *dwc)
+{
+	u32		reg;
+
+	/* Assert USB3 PHY by HW */
+	reg = 0x2a0c0102;
+	dwc3_writel(dwc->regs, DWC3_GUSB3PIPECTL(0), reg);
+
+	mdelay(100);
+}
 /**
  * dwc3_free_one_event_buffer - Frees one event buffer
  * @dwc: Pointer to our controller context structure
@@ -324,11 +335,14 @@ static int dwc3_core_init(struct dwc3 *dwc)
 		cpu_relax();
 	} while (true);
 
-	dwc3_core_soft_reset(dwc);
+//	dwc3_core_soft_reset(dwc);
+	dwc3_core_soft_reset_by_amd(dwc);
 
 	reg = dwc3_readl(dwc->regs, DWC3_GCTL);
 	reg &= ~DWC3_GCTL_SCALEDOWN_MASK;
-	reg &= ~DWC3_GCTL_DISSCRAMBLE; // set 1
+	reg |= DWC3_GCTL_DISSCRAMBLE; // set 1
+	reg &= ~DWC3_GCTL_U2EXIT_LFPS;
+	reg &= ~DWC3_GCTL_GBLHIBERNATIONEN;
 
 	switch (DWC3_GHWPARAMS1_EN_PWROPT(dwc->hwparams.hwparams1)) {
 	case DWC3_GHWPARAMS1_EN_PWROPT_CLK:
@@ -349,6 +363,7 @@ static int dwc3_core_init(struct dwc3 *dwc)
 
 	dwc3_core_num_eps(dwc);
 
+	dev_info(dwc->dev, "Ray: GCTL=0x%x latest\n", reg);
 	dwc3_writel(dwc->regs, DWC3_GCTL, reg);
 
 	return 0;
@@ -359,8 +374,8 @@ err0:
 
 static void dwc3_core_exit(struct dwc3 *dwc)
 {
-	usb_phy_shutdown(dwc->usb2_phy);
-	usb_phy_shutdown(dwc->usb3_phy);
+//	usb_phy_shutdown(dwc->usb2_phy);
+//	usb_phy_shutdown(dwc->usb3_phy);
 }
 
 #define DWC3_ALIGN_MASK		(16 - 1)
@@ -398,6 +413,7 @@ static int dwc3_probe(struct platform_device *pdev)
 	dwc->xhci_resources[1].flags = res->flags;
 	dwc->xhci_resources[1].name = res->name;
 
+	dev_info(dev, "Ray: res[1]IRQstart=0x%x, name=%s\n", res->start, res->name);
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 	if (!res) {
 		dev_err(dev, "missing memory resource\n");
@@ -408,6 +424,7 @@ static int dwc3_probe(struct platform_device *pdev)
 					DWC3_XHCI_REGS_END;
 	dwc->xhci_resources[0].flags = res->flags;
 	dwc->xhci_resources[0].name = res->name;
+	dev_info(dev, "Ray: res[0]MEMstart=0x%x, name=%s\n", res->start, res->name);
 
 	 /*
 	  * Request memory region but exclude xHCI regs,
@@ -421,52 +438,59 @@ static int dwc3_probe(struct platform_device *pdev)
 		return -ENOMEM;
 	}
 
+	dev_info(dev, "ioremap by Ray\n");
 	regs = devm_ioremap_nocache(dev, res->start, resource_size(res));
 	if (!regs) {
 		dev_err(dev, "ioremap failed\n");
 		return -ENOMEM;
 	}
 
+	dev_info(dev, "ioremap after Ray\n");
 	if (node) {
 		dwc->usb2_phy = devm_usb_get_phy_by_phandle(dev, "usb-phy", 0);
 		dwc->usb3_phy = devm_usb_get_phy_by_phandle(dev, "usb-phy", 1);
 	} else {
+		dev_info(dev, "before get phy no node Ray\n");
 		dwc->usb2_phy = devm_usb_get_phy(dev, USB_PHY_TYPE_USB2);
 		dwc->usb3_phy = devm_usb_get_phy(dev, USB_PHY_TYPE_USB3);
 	}
 
-	if (IS_ERR(dwc->usb2_phy)) {
-		ret = PTR_ERR(dwc->usb2_phy);
+	dev_info(dev, "before IS_ERR usb2 phy Ray\n");
+//	if (IS_ERR(dwc->usb2_phy)) {
+//		dev_info(dev, "Enter IS_ERR usb2 phy Ray\n");
+//		ret = PTR_ERR(dwc->usb2_phy);
+//
+//		/*
+//		 * if -ENXIO is returned, it means PHY layer wasn't
+//		 * enabled, so it makes no sense to return -EPROBE_DEFER
+//		 * in that case, since no PHY driver will ever probe.
+//		 */
+//		if (ret == -ENXIO)
+//			return ret;
+//
+//		dev_err(dev, "no usb2 phy configured\n");
+//		return -EPROBE_DEFER;
+//	}
+//
+//	dev_info(dev, "before IS_ERR usb3 phy Ray\n");
+//	if (IS_ERR(dwc->usb3_phy)) {
+//		ret = PTR_ERR(dwc->usb3_phy);
+//
+//		/*
+//		 * if -ENXIO is returned, it means PHY layer wasn't
+//		 * enabled, so it makes no sense to return -EPROBE_DEFER
+//		 * in that case, since no PHY driver will ever probe.
+//		 */
+//		if (ret == -ENXIO)
+//			return ret;
+//
+//		dev_err(dev, "no usb3 phy configured\n");
+//		return -EPROBE_DEFER;
+//	}
 
-		/*
-		 * if -ENXIO is returned, it means PHY layer wasn't
-		 * enabled, so it makes no sense to return -EPROBE_DEFER
-		 * in that case, since no PHY driver will ever probe.
-		 */
-		if (ret == -ENXIO)
-			return ret;
-
-		dev_err(dev, "no usb2 phy configured\n");
-		return -EPROBE_DEFER;
-	}
-
-	if (IS_ERR(dwc->usb3_phy)) {
-		ret = PTR_ERR(dwc->usb3_phy);
-
-		/*
-		 * if -ENXIO is returned, it means PHY layer wasn't
-		 * enabled, so it makes no sense to return -EPROBE_DEFER
-		 * in that case, since no PHY driver will ever probe.
-		 */
-		if (ret == -ENXIO)
-			return ret;
-
-		dev_err(dev, "no usb3 phy configured\n");
-		return -EPROBE_DEFER;
-	}
-
-	usb_phy_set_suspend(dwc->usb2_phy, 0);
-	usb_phy_set_suspend(dwc->usb3_phy, 0);
+	dev_info(dev, "Config by Ray\n");
+//	usb_phy_set_suspend(dwc->usb2_phy, 0);
+//	usb_phy_set_suspend(dwc->usb3_phy, 0);
 
 	spin_lock_init(&dwc->lock);
 	platform_set_drvdata(pdev, dwc);
@@ -492,6 +516,7 @@ static int dwc3_probe(struct platform_device *pdev)
 
 	dwc->needs_fifo_resize = of_property_read_bool(node, "tx-fifo-resize");
 
+	dev_info(dwc->dev, "before by Ray\n");
 	pm_runtime_enable(dev);
 	pm_runtime_get_sync(dev);
 	pm_runtime_forbid(dev);
@@ -505,7 +530,9 @@ static int dwc3_probe(struct platform_device *pdev)
 		goto err0;
 	}
 
+	dev_info(dwc->dev, "dwc3_core_init before by Ray\n");
 	ret = dwc3_core_init(dwc);
+	dev_info(dwc->dev, "dwc3_core_init return by Ray\n");
 	if (ret) {
 		dev_err(dev, "failed to initialize core\n");
 		goto err0;
@@ -524,6 +551,7 @@ static int dwc3_probe(struct platform_device *pdev)
 	else
 		mode = DWC3_MODE_DRD;
 
+	dev_info(dev, "Ray: mode = %d by Ray\n", mode);
 	switch (mode) {
 	case DWC3_MODE_DEVICE:
 		dwc3_set_mode(dwc, DWC3_GCTL_PRTCAP_DEVICE);
@@ -534,6 +562,7 @@ static int dwc3_probe(struct platform_device *pdev)
 		}
 		break;
 	case DWC3_MODE_HOST:
+		dev_info(dev, "Ray, enter into host\n");
 		dwc3_set_mode(dwc, DWC3_GCTL_PRTCAP_HOST);
 		ret = dwc3_host_init(dwc);
 		if (ret) {
@@ -568,6 +597,7 @@ static int dwc3_probe(struct platform_device *pdev)
 	}
 
 	pm_runtime_allow(dev);
+	dev_info(dev, "Ray: %s is end\n", __func__);
 
 	return 0;
 
@@ -604,8 +634,8 @@ static int dwc3_remove(struct platform_device *pdev)
 {
 	struct dwc3	*dwc = platform_get_drvdata(pdev);
 
-	usb_phy_set_suspend(dwc->usb2_phy, 1);
-	usb_phy_set_suspend(dwc->usb3_phy, 1);
+//	usb_phy_set_suspend(dwc->usb2_phy, 1);
+//	usb_phy_set_suspend(dwc->usb3_phy, 1);
 
 	pm_runtime_put(&pdev->dev);
 	pm_runtime_disable(&pdev->dev);

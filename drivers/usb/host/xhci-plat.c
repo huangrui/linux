@@ -94,6 +94,7 @@ static int xhci_plat_probe(struct platform_device *pdev)
 	if (usb_disabled())
 		return -ENODEV;
 
+	dev_info(&pdev->dev, "%s, calling by Ray\n", __func__);
 	driver = &xhci_plat_xhci_driver;
 
 	irq = platform_get_irq(pdev, 0);

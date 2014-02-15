@@ -44,6 +44,7 @@ int dwc3_host_init(struct dwc3 *dwc)
 	struct platform_device	*xhci;
 	int			ret;
 
+	dev_info(dwc->dev, "%s, init host xHCI device by Ray\n", __func__);
 	xhci = platform_device_alloc("xhci-hcd", PLATFORM_DEVID_AUTO);
 	if (!xhci) {
 		dev_err(dwc->dev, "couldn't allocate xHCI device\n");
@@ -72,6 +73,7 @@ int dwc3_host_init(struct dwc3 *dwc)
 		goto err1;
 	}
 
+	dev_info(dwc->dev, "%s,is end by Ray\n", __func__);
 	return 0;
 
 err1:
