@@ -2741,6 +2741,7 @@ irqreturn_t xhci_irq(struct usb_hcd *hcd)
 	union xhci_trb *event_ring_deq;
 	dma_addr_t deq;
 
+	xhci_dbg(xhci, "%s: is calling by Ray xhci irq\n", __func__);
 	spin_lock(&xhci->lock);
 	/* Check if the xHC generated the interrupt, or the irq is shared */
 	status = xhci_readl(xhci, &xhci->op_regs->status);

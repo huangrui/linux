@@ -340,9 +340,9 @@ static int dwc3_core_init(struct dwc3 *dwc)
 
 	reg = dwc3_readl(dwc->regs, DWC3_GCTL);
 	reg &= ~DWC3_GCTL_SCALEDOWN_MASK;
-	reg |= DWC3_GCTL_DISSCRAMBLE; // set 1
-	reg &= ~DWC3_GCTL_U2EXIT_LFPS;
-	reg &= ~DWC3_GCTL_GBLHIBERNATIONEN;
+	reg &= ~DWC3_GCTL_DISSCRAMBLE; // set 1
+	reg |= DWC3_GCTL_U2EXIT_LFPS;
+	reg |= DWC3_GCTL_GBLHIBERNATIONEN;
 
 	switch (DWC3_GHWPARAMS1_EN_PWROPT(dwc->hwparams.hwparams1)) {
 	case DWC3_GHWPARAMS1_EN_PWROPT_CLK:
@@ -731,8 +731,8 @@ static int dwc3_suspend(struct device *dev)
 	dwc->gctl = dwc3_readl(dwc->regs, DWC3_GCTL);
 	spin_unlock_irqrestore(&dwc->lock, flags);
 
-	usb_phy_shutdown(dwc->usb3_phy);
-	usb_phy_shutdown(dwc->usb2_phy);
+//	usb_phy_shutdown(dwc->usb3_phy);
+//	usb_phy_shutdown(dwc->usb2_phy);
 
 	return 0;
 }
@@ -742,8 +742,8 @@ static int dwc3_resume(struct device *dev)
 	struct dwc3	*dwc = dev_get_drvdata(dev);
 	unsigned long	flags;
 
-	usb_phy_init(dwc->usb3_phy);
-	usb_phy_init(dwc->usb2_phy);
+//	usb_phy_init(dwc->usb3_phy);
+//	usb_phy_init(dwc->usb2_phy);
 	msleep(100);
 
 	spin_lock_irqsave(&dwc->lock, flags);
