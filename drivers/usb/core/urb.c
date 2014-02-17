@@ -332,6 +332,7 @@ int usb_submit_urb(struct urb *urb, gfp_t mem_flags)
 	if ((!dev) || (dev->state < USB_STATE_UNAUTHENTICATED))
 		return -ENODEV;
 
+	dev_dbg(&dev->dev, "%s is calling by Ray\n", __func__);
 	/* For now, get the endpoint from the pipe.  Eventually drivers
 	 * will be required to set urb->ep directly and we will eliminate
 	 * urb->pipe.

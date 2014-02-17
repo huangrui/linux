@@ -455,6 +455,7 @@ static int rh_call_control (struct usb_hcd *hcd, struct urb *urb)
 	u8		patch_wakeup = 0;
 	u8		patch_protocol = 0;
 
+	dev_dbg(hcd->self.controller, "%s, is calling by Ray\n", __func__);
 	might_sleep();
 
 	spin_lock_irq(&hcd_root_hub_lock);
@@ -734,6 +735,7 @@ void usb_hcd_poll_rh_status(struct usb_hcd *hcd)
 	if (hcd->uses_new_polling ? HCD_POLL_RH(hcd) :
 			(length == 0 && hcd->status_urb != NULL))
 		mod_timer (&hcd->rh_timer, (jiffies/(HZ/4) + 1) * (HZ/4));
+	dev_dbg(hcd->self.controller, "%s, is end by Ray\n", __func__);
 }
 EXPORT_SYMBOL_GPL(usb_hcd_poll_rh_status);
 

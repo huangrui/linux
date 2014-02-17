@@ -689,6 +689,7 @@ struct dwc3 {
 	struct usb_phy		*usb3_phy;
 
 	void __iomem		*regs;
+	void __iomem		*amd_regs;
 	size_t			regs_size;
 
 	/* used for suspend/resume */
