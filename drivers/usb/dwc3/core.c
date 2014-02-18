@@ -366,6 +366,8 @@ static int dwc3_core_init(struct dwc3 *dwc)
 	dev_info(dwc->dev, "Ray: GCTL=0x%x latest\n", reg);
 	dwc3_writel(dwc->regs, DWC3_GCTL, reg);
 
+	reg = amd_dwc3_readl(dwc->amd_regs, 0xc100);
+	dev_info(dwc->dev, "Ray: OTG_TILE_CHICKEN_BITS=0x%x latest\n", reg);
 	return 0;
 
 err0:
@@ -390,8 +392,11 @@ static int dwc3_probe(struct platform_device *pdev)
 	int			ret = -ENOMEM;
 
 	void __iomem		*regs;
+	void __iomem		*amd_regs;
 	void			*mem;
 
+	resource_size_t		amd_start;
+	size_t			amd_size;
 	u8			mode;
 
 	dev_info(dev, "Ray: %s enter into driver binding core\n", __func__);
@@ -412,6 +417,9 @@ static int dwc3_probe(struct platform_device *pdev)
 	dwc->xhci_resources[1].end = res->end;
 	dwc->xhci_resources[1].flags = res->flags;
 	dwc->xhci_resources[1].name = res->name;
+
+	amd_start = 0xfedc0000;
+	amd_size = 0xcfff;
 
 	dev_info(dev, "Ray: res[1]IRQstart=0x%x, name=%s\n", res->start, res->name);
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
@@ -446,6 +454,23 @@ static int dwc3_probe(struct platform_device *pdev)
 	}
 
 	dev_info(dev, "ioremap after Ray\n");
+
+	/* Maybe change name */
+	res = devm_request_mem_region(dev, amd_start, amd_size, dev_name(dev));
+	if (!res) {
+		dev_err(dev, "can't request amd mem region\n");
+		return -ENOMEM;
+	}
+
+	dev_info(dev, "amd ioremap by Ray\n");
+	amd_regs = devm_ioremap_nocache(dev, amd_start, amd_size);
+	if (!regs) {
+		dev_err(dev, "amd ioremap failed\n");
+		return -ENOMEM;
+	}
+
+	dev_info(dev, "amd ioremap after Ray\n");
+
 	if (node) {
 		dwc->usb2_phy = devm_usb_get_phy_by_phandle(dev, "usb-phy", 0);
 		dwc->usb3_phy = devm_usb_get_phy_by_phandle(dev, "usb-phy", 1);
@@ -496,6 +521,7 @@ static int dwc3_probe(struct platform_device *pdev)
 	platform_set_drvdata(pdev, dwc);
 
 	dwc->regs	= regs;
+	dwc->amd_regs	= amd_regs;
 	dwc->regs_size	= resource_size(res);
 	dwc->dev	= dev;
 
