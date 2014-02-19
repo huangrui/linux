@@ -2689,6 +2689,8 @@ static int xhci_handle_event(struct xhci_hcd *xhci)
 		handle_cmd_completion(xhci, &event->event_cmd);
 		break;
 	case TRB_TYPE(TRB_PORT_STATUS):
+		xhci_dbg(xhci, "This is a xHCI port status TRB by Ray:\n");
+		xhci_print_registers(xhci);
 		handle_port_status(xhci, event);
 		update_ptrs = 0;
 		break;
@@ -2741,9 +2743,11 @@ irqreturn_t xhci_irq(struct usb_hcd *hcd)
 	union xhci_trb *event_ring_deq;
 	dma_addr_t deq;
 
+	xhci_dbg(xhci, "%s: is calling by Ray\n", __func__);
 	spin_lock(&xhci->lock);
 	/* Check if the xHC generated the interrupt, or the irq is shared */
 	status = xhci_readl(xhci, &xhci->op_regs->status);
+	xhci_dbg(xhci, "Ray: op_regs status=0x%x in irq\n", status);
 	if (status == 0xffffffff)
 		goto hw_died;
 
