@@ -119,6 +119,7 @@ static int dwc3_pci_probe(struct pci_dev *pci,
 	struct resource		res[2];
 	struct platform_device	*dwc3;
 	struct dwc3_pci		*glue;
+	u8			reg;
 	int			ret = -ENOMEM;
 	struct device		*dev = &pci->dev;
 
@@ -129,6 +130,8 @@ static int dwc3_pci_probe(struct pci_dev *pci,
 		return -ENOMEM;
 	}
 
+	pci_read_config_byte(pci, 0x06, &reg);
+	dev_info(dev, "pci header 0x06=%x\n", reg);
 	glue->dev = dev;
 
 	ret = pci_enable_device(pci);
