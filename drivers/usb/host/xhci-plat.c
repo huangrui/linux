@@ -25,6 +25,7 @@ static void xhci_plat_quirks(struct device *dev, struct xhci_hcd *xhci)
 	 * dev struct in order to setup MSI
 	 */
 	xhci->quirks |= XHCI_PLAT;
+	//xhci->quirks |= XHCI_BROKEN_MSI;
 }
 
 /* called during probe() after chip reset completes */

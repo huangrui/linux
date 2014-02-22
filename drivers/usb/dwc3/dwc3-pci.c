@@ -131,7 +131,10 @@ static int dwc3_pci_probe(struct pci_dev *pci,
 	}
 
 	pci_read_config_byte(pci, 0x06, &reg);
-	dev_info(dev, "pci header 0x06=%x\n", reg);
+	dev_info(dev, "Ray: pci header 0x06=%x before\n", reg);
+//	pci_write_config_byte(pci, 0x06, 0x38);
+	pci_read_config_byte(pci, 0x06, &reg);
+	dev_info(dev, "Ray: pci header 0x06=%x after\n", reg);
 	glue->dev = dev;
 
 	ret = pci_enable_device(pci);
