@@ -676,6 +676,7 @@ struct dwc3 {
 
 	struct device		*dev;
 
+	struct platform_device	*pdev;
 	struct platform_device	*xhci;
 	struct resource		xhci_resources[DWC3_XHCI_RESOURCES_NUM];
 

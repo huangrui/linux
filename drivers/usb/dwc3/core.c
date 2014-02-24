@@ -417,6 +417,7 @@ static int dwc3_probe(struct platform_device *pdev)
 	dwc->xhci_resources[1].end = res->end;
 	dwc->xhci_resources[1].flags = res->flags;
 	dwc->xhci_resources[1].name = res->name;
+	dwc->pdev = pdev;
 
 	amd_start = 0xfedc0000;
 	amd_size = 0xcfff;
