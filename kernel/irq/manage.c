@@ -1007,6 +1007,11 @@ __setup_irq(unsigned int irq, struct irq_desc *desc, struct irqaction *new)
 		 * set the trigger type must match. Also all must
 		 * agree on ONESHOT.
 		 */
+//		if (irq==17)
+			pr_info("Raywarning irq %d. %08x (%s) vs. %08x (%s)\n",
+					irq, new->flags, new->name, old->flags,
+					old->name);
+
 		if (!((old->flags & new->flags) & IRQF_SHARED) ||
 		    ((old->flags ^ new->flags) & IRQF_TRIGGER_MASK) ||
 		    ((old->flags ^ new->flags) & IRQF_ONESHOT))

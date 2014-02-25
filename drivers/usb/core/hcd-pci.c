@@ -192,6 +192,7 @@ int usb_hcd_pci_probe(struct pci_dev *dev, const struct pci_device_id *id)
 		return -ENODEV;
 	dev->current_state = PCI_D0;
 
+	dev_dbg(&dev->dev, "driver->flags=0x%x, dev->class=0x%x\n", driver->flags, dev->class);
 	/*
 	 * The xHCI driver has its own irq management
 	 * make sure irq setup is not touched for xhci in generic hcd code
