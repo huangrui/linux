@@ -13,6 +13,7 @@
 
 #include <linux/device.h>
 #include <linux/mod_devicetable.h>
+#include <linux/pci.h>
 
 #define PLATFORM_DEVID_NONE	(-1)
 #define PLATFORM_DEVID_AUTO	(-2)
@@ -34,6 +35,7 @@ struct platform_device {
 
 	/* arch specific additions */
 	struct pdev_archdata	archdata;
+	struct pci_dev	*translate_pci;
 };
 
 #define platform_get_device_id(pdev)	((pdev)->id_entry)
