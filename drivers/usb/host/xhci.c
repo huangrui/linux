@@ -21,7 +21,6 @@
  */
 
 #include <linux/pci.h>
-#include <linux/platform_device.h>
 #include <linux/irq.h>
 #include <linux/log2.h>
 #include <linux/module.h>
@@ -191,20 +190,6 @@ int xhci_reset(struct xhci_hcd *xhci)
 }
 
 #ifdef CONFIG_PCI
-static struct pci_dev *amd_fpga_to_pci(struct xhci_hcd *xhci)
-{
-	struct pci_dev *pdev;
-
-	if (xhci->quirks & XHCI_AMD_FPGA) {
-		struct platform_device *plat_dev;
-		plat_dev = to_platform_device(xhci_to_hcd(xhci)->self.controller);
-		pdev = plat_dev->translate_pci;
-	}
-	else
-		pdev = to_pci_dev(xhci_to_hcd(xhci)->self.controller);
-	return pdev;
-}
-
 static int xhci_free_msi(struct xhci_hcd *xhci)
 {
 	int i;
@@ -225,7 +210,7 @@ static int xhci_free_msi(struct xhci_hcd *xhci)
 static int xhci_setup_msi(struct xhci_hcd *xhci)
 {
 	int ret;
-	struct pci_dev  *pdev = amd_fpga_to_pci(xhci);
+	struct pci_dev  *pdev = to_pci_dev(xhci_to_hcd(xhci)->self.controller);
 
 	ret = pci_enable_msi(pdev);
 	if (ret) {
@@ -249,7 +234,7 @@ static int xhci_setup_msi(struct xhci_hcd *xhci)
  */
 static void xhci_free_irq(struct xhci_hcd *xhci)
 {
-	struct pci_dev *pdev = amd_fpga_to_pci(xhci);
+	struct pci_dev *pdev = to_pci_dev(xhci_to_hcd(xhci)->self.controller);
 	int ret;
 
 	/* return if using legacy interrupt */
@@ -272,7 +257,7 @@ static int xhci_setup_msix(struct xhci_hcd *xhci)
 {
 	int i, ret = 0;
 	struct usb_hcd *hcd = xhci_to_hcd(xhci);
-	struct pci_dev *pdev = amd_fpga_to_pci(xhci);
+	struct pci_dev *pdev = to_pci_dev(hcd->self.controller);
 
 	/*
 	 * calculate number of msi-x vectors supported.
@@ -328,7 +313,7 @@ free_entries:
 static void xhci_cleanup_msix(struct xhci_hcd *xhci)
 {
 	struct usb_hcd *hcd = xhci_to_hcd(xhci);
-	struct pci_dev *pdev = amd_fpga_to_pci(xhci);
+	struct pci_dev *pdev = to_pci_dev(hcd->self.controller);
 
 	xhci_free_irq(xhci);
 
@@ -360,17 +345,11 @@ static int xhci_try_enable_msi(struct usb_hcd *hcd)
 	struct pci_dev  *pdev;
 	int ret;
 
-	if (xhci->quirks & XHCI_AMD_FPGA)
-		goto amd_fpga;
-
 	/* The xhci platform device has set up IRQs through usb_add_hcd. */
 	if (xhci->quirks & XHCI_PLAT)
 		return 0;
 
- amd_fpga:
-	pdev = amd_fpga_to_pci(xhci);
-	xhci_dbg(xhci, "Ray: msi_enabled=%d, msix_enabled=%d, irq=%d in xhci\n",
-			pdev->msi_enabled, pdev->msix_enabled, pdev->irq);
+	pdev = to_pci_dev(xhci_to_hcd(xhci)->self.controller);
 	/*
 	 * Some Fresco Logic host controllers advertise MSI, but fail to
 	 * generate interrupts.  Don't even try to enable MSI.
@@ -398,7 +377,6 @@ static int xhci_try_enable_msi(struct usb_hcd *hcd)
 	}
 
  legacy_irq:
-	xhci_dbg(xhci, "Go to legacy irq=%d by Ray\n", pdev->irq);
 	/* fall back to legacy interrupt*/
 	ret = request_irq(pdev->irq, &usb_hcd_irq, IRQF_SHARED,
 			hcd->irq_descr, hcd);
@@ -797,7 +775,7 @@ void xhci_shutdown(struct usb_hcd *hcd)
 	struct xhci_hcd *xhci = hcd_to_xhci(hcd);
 
 	if (xhci->quirks & XHCI_SPURIOUS_REBOOT)
-		usb_disable_xhci_ports(amd_fpga_to_pci(xhci));
+		usb_disable_xhci_ports(to_pci_dev(hcd->self.controller));
 
 	spin_lock_irq(&xhci->lock);
 	xhci_halt(xhci);
