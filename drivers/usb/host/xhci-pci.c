@@ -57,7 +57,7 @@ static void xhci_pci_quirks(struct device *dev, struct xhci_hcd *xhci)
 {
 	struct pci_dev		*pdev = to_pci_dev(dev);
 
-	xhci->quirks |= XHCI_BROKEN_MSI;
+//	xhci->quirks |= XHCI_BROKEN_MSI;
 	/* Look for vendor-specific quirks */
 	if (pdev->vendor == PCI_VENDOR_ID_FRESCO_LOGIC &&
 			(pdev->device == PCI_DEVICE_ID_FRESCO_LOGIC_PDK ||
