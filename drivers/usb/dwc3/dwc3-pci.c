@@ -172,8 +172,6 @@ static int dwc3_pci_probe(struct pci_dev *pci,
 
 	dev_info(dev, "Ray: start 0x%x \n", res[0].start);
 	dev_info(dev, "Ray: start 0x%d \n", res[1].start);
-	dev_info(dev, "Ray: msi_enabled=%d, msix_enabled=%d, irq=%d in dwc3\n",
-			pci->msi_enabled, pci->msix_enabled, pci->irq);
 	ret = platform_device_add_resources(dwc3, res, ARRAY_SIZE(res));
 	if (ret) {
 		dev_err(dev, "couldn't add resources to dwc3 device\n");
@@ -187,7 +185,6 @@ static int dwc3_pci_probe(struct pci_dev *pci,
 	dwc3->dev.dma_mask = dev->dma_mask;
 	dwc3->dev.dma_parms = dev->dma_parms;
 	dwc3->dev.parent = dev;
-	dwc3->translate_pci = pci;
 	glue->dwc3 = dwc3;
 
 	ret = platform_device_add(dwc3);
