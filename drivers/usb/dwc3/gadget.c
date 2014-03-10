@@ -2601,6 +2601,7 @@ int dwc3_gadget_init(struct dwc3 *dwc)
 	u32					reg;
 	int					ret;
 
+	dev_dbg(dwc->dev, "%s, is calling by Ray\n", __func__);
 	dwc->ctrl_req = dma_alloc_coherent(dwc->dev, sizeof(*dwc->ctrl_req),
 			&dwc->ctrl_req_addr, GFP_KERNEL);
 	if (!dwc->ctrl_req) {
@@ -2664,6 +2665,7 @@ int dwc3_gadget_init(struct dwc3 *dwc)
 		goto err5;
 	}
 
+	dev_dbg(dwc->dev, "%s, is end by Ray\n", __func__);
 	return 0;
 
 err5:
