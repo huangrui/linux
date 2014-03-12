@@ -132,6 +132,7 @@ static void dwc3_core_soft_reset_by_amd(struct dwc3 *dwc)
 
 	mdelay(100);
 }
+
 /**
  * dwc3_free_one_event_buffer - Frees one event buffer
  * @dwc: Pointer to our controller context structure
@@ -340,8 +341,8 @@ static int dwc3_core_init(struct dwc3 *dwc)
 
 	reg = dwc3_readl(dwc->regs, DWC3_GCTL);
 	reg &= ~DWC3_GCTL_SCALEDOWN_MASK;
-	reg &= ~DWC3_GCTL_DISSCRAMBLE; // set 1
-	reg |= DWC3_GCTL_U2EXIT_LFPS;
+	reg |= DWC3_GCTL_DISSCRAMBLE; // set 1
+	reg &= ~DWC3_GCTL_U2EXIT_LFPS;
 	reg |= DWC3_GCTL_GBLHIBERNATIONEN;
 
 	switch (DWC3_GHWPARAMS1_EN_PWROPT(dwc->hwparams.hwparams1)) {
