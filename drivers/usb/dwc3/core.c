@@ -122,7 +122,7 @@ static void dwc3_core_soft_reset(struct dwc3 *dwc)
 	dwc3_writel(dwc->regs, DWC3_GCTL, reg);
 }
 
-static void dwc3_core_soft_reset_by_amd(struct dwc3 *dwc)
+static void dwc3_core_set_pipe3_by_amd(struct dwc3 *dwc)
 {
 	u32		reg;
 
@@ -336,8 +336,8 @@ static int dwc3_core_init(struct dwc3 *dwc)
 		cpu_relax();
 	} while (true);
 
-//	dwc3_core_soft_reset(dwc);
-	dwc3_core_soft_reset_by_amd(dwc);
+	dwc3_core_soft_reset(dwc);
+	dwc3_core_set_pipe3_by_amd(dwc);
 
 	reg = dwc3_readl(dwc->regs, DWC3_GCTL);
 	reg &= ~DWC3_GCTL_SCALEDOWN_MASK;
