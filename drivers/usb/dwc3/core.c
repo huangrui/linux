@@ -100,8 +100,8 @@ static void dwc3_core_soft_reset(struct dwc3 *dwc)
 	reg |= DWC3_GUSB2PHYCFG_PHYSOFTRST;
 	dwc3_writel(dwc->regs, DWC3_GUSB2PHYCFG(0), reg);
 
-	//usb_phy_init(dwc->usb2_phy);
-	//usb_phy_init(dwc->usb3_phy);
+	usb_phy_init(dwc->usb2_phy);
+	usb_phy_init(dwc->usb3_phy);
 	mdelay(100);
 
 	/* Clear USB3 PHY reset */
@@ -377,8 +377,8 @@ err0:
 
 static void dwc3_core_exit(struct dwc3 *dwc)
 {
-//	usb_phy_shutdown(dwc->usb2_phy);
-//	usb_phy_shutdown(dwc->usb3_phy);
+	usb_phy_shutdown(dwc->usb2_phy);
+	usb_phy_shutdown(dwc->usb3_phy);
 }
 
 #define DWC3_ALIGN_MASK		(16 - 1)
@@ -482,41 +482,41 @@ static int dwc3_probe(struct platform_device *pdev)
 	}
 
 	dev_info(dev, "before IS_ERR usb2 phy Ray\n");
-//	if (IS_ERR(dwc->usb2_phy)) {
-//		dev_info(dev, "Enter IS_ERR usb2 phy Ray\n");
-//		ret = PTR_ERR(dwc->usb2_phy);
-//
-//		/*
-//		 * if -ENXIO is returned, it means PHY layer wasn't
-//		 * enabled, so it makes no sense to return -EPROBE_DEFER
-//		 * in that case, since no PHY driver will ever probe.
-//		 */
-//		if (ret == -ENXIO)
-//			return ret;
-//
-//		dev_err(dev, "no usb2 phy configured\n");
-//		return -EPROBE_DEFER;
-//	}
-//
-//	dev_info(dev, "before IS_ERR usb3 phy Ray\n");
-//	if (IS_ERR(dwc->usb3_phy)) {
-//		ret = PTR_ERR(dwc->usb3_phy);
-//
-//		/*
-//		 * if -ENXIO is returned, it means PHY layer wasn't
-//		 * enabled, so it makes no sense to return -EPROBE_DEFER
-//		 * in that case, since no PHY driver will ever probe.
-//		 */
-//		if (ret == -ENXIO)
-//			return ret;
-//
-//		dev_err(dev, "no usb3 phy configured\n");
-//		return -EPROBE_DEFER;
-//	}
+	if (IS_ERR(dwc->usb2_phy)) {
+		dev_info(dev, "Enter IS_ERR usb2 phy Ray\n");
+		ret = PTR_ERR(dwc->usb2_phy);
+
+		/*
+		 * if -ENXIO is returned, it means PHY layer wasn't
+		 * enabled, so it makes no sense to return -EPROBE_DEFER
+		 * in that case, since no PHY driver will ever probe.
+		 */
+		if (ret == -ENXIO)
+			return ret;
+
+		dev_err(dev, "no usb2 phy configured\n");
+		return -EPROBE_DEFER;
+	}
+
+	dev_info(dev, "before IS_ERR usb3 phy Ray\n");
+	if (IS_ERR(dwc->usb3_phy)) {
+		ret = PTR_ERR(dwc->usb3_phy);
+
+		/*
+		 * if -ENXIO is returned, it means PHY layer wasn't
+		 * enabled, so it makes no sense to return -EPROBE_DEFER
+		 * in that case, since no PHY driver will ever probe.
+		 */
+		if (ret == -ENXIO)
+			return ret;
+
+		dev_err(dev, "no usb3 phy configured\n");
+		return -EPROBE_DEFER;
+	}
 
 	dev_info(dev, "Config by Ray\n");
-//	usb_phy_set_suspend(dwc->usb2_phy, 0);
-//	usb_phy_set_suspend(dwc->usb3_phy, 0);
+	usb_phy_set_suspend(dwc->usb2_phy, 0);
+	usb_phy_set_suspend(dwc->usb3_phy, 0);
 
 	spin_lock_init(&dwc->lock);
 	platform_set_drvdata(pdev, dwc);
@@ -661,8 +661,8 @@ static int dwc3_remove(struct platform_device *pdev)
 {
 	struct dwc3	*dwc = platform_get_drvdata(pdev);
 
-//	usb_phy_set_suspend(dwc->usb2_phy, 1);
-//	usb_phy_set_suspend(dwc->usb3_phy, 1);
+	usb_phy_set_suspend(dwc->usb2_phy, 1);
+	usb_phy_set_suspend(dwc->usb3_phy, 1);
 
 	pm_runtime_put(&pdev->dev);
 	pm_runtime_disable(&pdev->dev);
@@ -758,8 +758,8 @@ static int dwc3_suspend(struct device *dev)
 	dwc->gctl = dwc3_readl(dwc->regs, DWC3_GCTL);
 	spin_unlock_irqrestore(&dwc->lock, flags);
 
-//	usb_phy_shutdown(dwc->usb3_phy);
-//	usb_phy_shutdown(dwc->usb2_phy);
+	usb_phy_shutdown(dwc->usb3_phy);
+	usb_phy_shutdown(dwc->usb2_phy);
 
 	return 0;
 }
@@ -769,8 +769,8 @@ static int dwc3_resume(struct device *dev)
 	struct dwc3	*dwc = dev_get_drvdata(dev);
 	unsigned long	flags;
 
-//	usb_phy_init(dwc->usb3_phy);
-//	usb_phy_init(dwc->usb2_phy);
+	usb_phy_init(dwc->usb3_phy);
+	usb_phy_init(dwc->usb2_phy);
 	msleep(100);
 
 	spin_lock_irqsave(&dwc->lock, flags);
