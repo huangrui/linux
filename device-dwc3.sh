@@ -17,4 +17,5 @@ sudo cp /home/amd/linux-usb/drivers/usb/dwc3/dwc3-pci.ko /lib/modules/3.10.20-dw
 sudo sync
 sleep 3
 sudo modprobe dwc3_pci
+sleep 3
 sudo modprobe g_zero
