@@ -319,6 +319,8 @@ static int dwc3_core_init(struct dwc3 *dwc)
 	}
 	dwc->revision = reg;
 
+	mdelay(5);
+
 	/* issue device SoftReset too */
 	timeout = jiffies + msecs_to_jiffies(500);
 	dwc3_writel(dwc->regs, DWC3_DCTL, DWC3_DCTL_CSFTRST);
@@ -341,8 +343,8 @@ static int dwc3_core_init(struct dwc3 *dwc)
 
 	reg = dwc3_readl(dwc->regs, DWC3_GCTL);
 	reg &= ~DWC3_GCTL_SCALEDOWN_MASK;
-	reg |= DWC3_GCTL_DISSCRAMBLE; // set 1
-	reg &= ~DWC3_GCTL_U2EXIT_LFPS;
+	reg &= ~DWC3_GCTL_DISSCRAMBLE; // set 1
+	reg |= DWC3_GCTL_U2EXIT_LFPS;
 	reg |= DWC3_GCTL_GBLHIBERNATIONEN;
 
 	switch (DWC3_GHWPARAMS1_EN_PWROPT(dwc->hwparams.hwparams1)) {
