@@ -175,6 +175,7 @@ static int nop_usb_xceiv_probe(struct platform_device *pdev)
 		needs_reset = pdata->needs_reset;
 	}
 
+	dev_dbg(&pdev->dev, "Ray: phy type=%d\n", type);
 	nop->clk = devm_clk_get(&pdev->dev, "main_clk");
 	if (IS_ERR(nop->clk)) {
 		dev_dbg(&pdev->dev, "Can't get phy clock: %ld\n",
