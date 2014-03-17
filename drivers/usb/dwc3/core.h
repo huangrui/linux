@@ -241,6 +241,7 @@
 #define DWC3_DCTL_TRGTULST_SS_INACT	(DWC3_DCTL_TRGTULST(6))
 
 /* These apply for core versions 1.94a and later */
+#define DWC3_DCTL_LPM_NYET	(0xf << 20)
 #define DWC3_DCTL_KEEP_CONNECT	(1 << 19)
 #define DWC3_DCTL_L1_HIBER_EN	(1 << 18)
 #define DWC3_DCTL_CRS		(1 << 17)
