@@ -1244,7 +1244,7 @@ composite_setup(struct usb_gadget *gadget, const struct usb_ctrlrequest *ctrl)
 		switch (w_value >> 8) {
 
 		case USB_DT_DEVICE:
-			printk(KERN_INFO, "Ray: access USB_DT_DEVICE\n");
+			printk(KERN_INFO "Ray: access USB_DT_DEVICE\n");
 			cdev->desc.bNumConfigurations =
 				count_configs(cdev, USB_DT_DEVICE);
 			cdev->desc.bMaxPacketSize0 =
@@ -1259,7 +1259,7 @@ composite_setup(struct usb_gadget *gadget, const struct usb_ctrlrequest *ctrl)
 			}
 
 			value = min(w_length, (u16) sizeof cdev->desc);
-			printk(KERN_INFO, "Ray: USB_DT_DEVICE size=0x%x\n", value);
+			printk(KERN_INFO "Ray: USB_DT_DEVICE size=0x%x\n", value);
 			memcpy(req->buf, &cdev->desc, value);
 			break;
 		case USB_DT_DEVICE_QUALIFIER:
@@ -1287,13 +1287,13 @@ composite_setup(struct usb_gadget *gadget, const struct usb_ctrlrequest *ctrl)
 				value = min(w_length, (u16) value);
 			break;
 		case USB_DT_BOS:
-			printk(KERN_INFO, "Ray: access USB_DT_BOS\n");
+			printk(KERN_INFO "Ray: access USB_DT_BOS\n");
 			if (gadget_is_superspeed(gadget)) {
 				value = bos_desc(cdev);
-				printk(KERN_INFO, "Ray: create bos value=0x%x\n", value);
-				printk(KERN_INFO, "Ray: create bos w_length=0x%x\n", w_length);
+				printk(KERN_INFO "Ray: create bos value=0x%x\n", value);
+				printk(KERN_INFO "Ray: create bos w_length=0x%x\n", w_length);
 				value = min(w_length, (u16) value);
-				printk(KERN_INFO, "Ray: create final value=0x%x\n", value);
+				printk(KERN_INFO "Ray: create final value=0x%x\n", value);
 			}
 			break;
 		}
