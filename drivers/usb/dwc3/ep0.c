@@ -780,6 +780,7 @@ static void dwc3_ep0_complete_data(struct dwc3 *dwc,
 	ur = &r->request;
 
 	trb = dwc->ep0_trb;
+	dev_dbg(dwc->dev, "Ray: dwc3 trb size=0x%x\n", trb->size);
 
 	status = DWC3_TRB_SIZE_TRBSTS(trb->size);
 	if (status == DWC3_TRBSTS_SETUP_PENDING) {
