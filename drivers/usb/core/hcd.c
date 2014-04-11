@@ -1873,6 +1873,7 @@ int usb_hcd_alloc_bandwidth(struct usb_device *udev,
 		}
 	}
 	ret = hcd->driver->check_bandwidth(hcd, udev);
+	dev_dbg(&udev->dev, "Ray ret of check_bandwidth=%d\n", ret);
 reset:
 	if (ret < 0)
 		hcd->driver->reset_bandwidth(hcd, udev);

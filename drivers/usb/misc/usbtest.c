@@ -108,8 +108,8 @@ static void dump_usbtest_dev(struct usbtest_dev *test)
 	dev_info(dev, "\t\tctrl_out: %d\n", test->info->ctrl_out);
 	dev_info(dev, "\t\tiso: %d\n", test->info->iso);
 	dev_info(dev, "\t\talt: %d\n", test->info->alt);
-	dev_info(dev, "\tin_pipe: %d\n", test->in_pipe);
-	dev_info(dev, "\tout_pipe: %d\n", test->out_pipe);
+	dev_info(dev, "\tin_pipe: 0x%x\n", test->in_pipe);
+	dev_info(dev, "\tout_pipe: 0x%x\n", test->out_pipe);
 	dev_info(dev, "\tin_iso_pipe: %d\n", test->in_iso_pipe);
 	dev_info(dev, "\tout_iso_pipe: %d\n", test->out_iso_pipe);
 }
@@ -187,6 +187,8 @@ try_iso:
 
 found:
 	udev = testdev_to_usbdev(dev);
+	dev_info(&udev->dev, "Ray: alt->desc.bAlternateSetting=%d\n",
+			alt->desc.bAlternateSetting);
 	dev->info->alt = alt->desc.bAlternateSetting;
 	if (alt->desc.bAlternateSetting != 0) {
 		tmp = usb_set_interface(udev,
@@ -195,6 +197,8 @@ found:
 		if (tmp < 0)
 			return tmp;
 	}
+	dev_info(&udev->dev, "Ray: udev->devnum=0x%x, bEndpointAddress=0x%x\n",
+			udev->devnum, in->desc.bEndpointAddress);
 
 	if (in) {
 		dev->in_pipe = usb_rcvbulkpipe(udev,
@@ -299,6 +303,7 @@ static inline void simple_fill_buf(struct urb *urb)
 	u8		*buf = urb->transfer_buffer;
 	unsigned	len = urb->transfer_buffer_length;
 
+	printk(KERN_INFO "Ray: pattern=%d\n", pattern);
 	switch (pattern) {
 	default:
 		/* FALLTHROUGH */
@@ -340,6 +345,7 @@ static int simple_check_buf(struct usbtest_dev *tdev, struct urb *urb)
 	u8		*buf = urb->transfer_buffer;
 	unsigned	len = urb->actual_length;
 
+	dev_info(&testdev_to_usbdev(tdev)->dev, "Ray: %s is calling\n", __func__);
 	int ret = check_guard_bytes(tdev, urb);
 	if (ret)
 		return ret;
