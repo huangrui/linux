@@ -1111,6 +1111,7 @@ static int ehci_hub_control (
 	default:
 error:
 		/* "stall" on error */
+		ehci_info (ehci, "ehset_single_step_set_feature before EPIPE\n");
 		retval = -EPIPE;
 	}
 error_exit:

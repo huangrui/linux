@@ -217,6 +217,7 @@ static int qtd_copy_status (
 			status = -EOVERFLOW;
 		/* CERR nonzero + halt --> stall */
 		} else if (QTD_CERR(token)) {
+			ehci_info(ehci, "EPIPE before qtd_copy_status\n");
 			status = -EPIPE;
 
 		/* In theory, more than one of the following bits can be set
@@ -488,6 +489,7 @@ qh_completions (struct ehci_hcd *ehci, struct ehci_qh *qh)
 				 * buffer in this case.  Strictly speaking this
 				 * is a violation of the spec.
 				 */
+				ehci_info(ehci, "EPIPE before qh_completions\n");
 				if (last_status != -EPIPE)
 					ehci_clear_tt_buffer(ehci, qh, urb,
 							token);

@@ -627,6 +627,7 @@ nongeneric:
 				(struct usb_hub_descriptor *)tbuf);
 		break;
 error:
+		dev_info(hcd->self.controller, "EPIPE on rh_call_control\n");
 		/* "protocol stall" on error */
 		status = -EPIPE;
 	}
