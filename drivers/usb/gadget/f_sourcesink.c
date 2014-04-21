@@ -561,7 +561,11 @@ static void source_sink_complete(struct usb_ep *ep, struct usb_request *req)
 		return;
 
 	cdev = ss->function.config->cdev;
+	INFO(cdev, "%s status=%d,req->actual=%d,req->length=%d\n", ep->name,
+			status, req->actual, req->length);
 
+	INFO(cdev, "%s req->num_sgs=%d,req->num_mapped_sgs=%d\n", ep->name,
+			req->num_sgs, req->num_mapped_sgs);
 	switch (status) {
 
 	case 0:				/* normal completion? */
