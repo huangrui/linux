@@ -102,6 +102,17 @@ static void dwc3_core_soft_reset(struct dwc3 *dwc)
 	dwc3_writel(dwc->regs, DWC3_GCTL, reg);
 }
 
+static void dwc3_core_set_pipe3_by_amd(struct dwc3 *dwc)
+{
+	u32		reg;
+
+	/* Assert USB3 PHY by HW */
+	reg = 0x2a0c0102;
+	dwc3_writel(dwc->regs, DWC3_GUSB3PIPECTL(0), reg);
+
+	mdelay(100);
+}
+
 /**
  * dwc3_free_one_event_buffer - Frees one event buffer
  * @dwc: Pointer to our controller context structure
@@ -307,10 +318,13 @@ static int dwc3_core_init(struct dwc3 *dwc)
 	} while (true);
 
 	dwc3_core_soft_reset(dwc);
+	dwc3_core_set_pipe3_by_amd(dwc);
 
 	reg = dwc3_readl(dwc->regs, DWC3_GCTL);
 	reg &= ~DWC3_GCTL_SCALEDOWN_MASK;
-	reg &= ~DWC3_GCTL_DISSCRAMBLE;
+	reg |= DWC3_GCTL_DISSCRAMBLE;
+	reg |= DWC3_GCTL_U2EXIT_LFPS;
+	reg |= DWC3_GCTL_GBLHIBERNATIONEN;
 
 	switch (DWC3_GHWPARAMS1_EN_PWROPT(dwc->hwparams.hwparams1)) {
 	case DWC3_GHWPARAMS1_EN_PWROPT_CLK:
