@@ -553,6 +553,7 @@ static void dwc3_remove_requests(struct dwc3 *dwc, struct dwc3_ep *dep)
 {
 	struct dwc3_request		*req;
 
+	dev_dbg(dwc->dev, "%s: is called by Ray\n", __func__);
 	if (!list_empty(&dep->req_queued)) {
 		dwc3_stop_active_transfer(dwc, dep->number);
 
@@ -560,6 +561,7 @@ static void dwc3_remove_requests(struct dwc3 *dwc, struct dwc3_ep *dep)
 		while (!list_empty(&dep->req_queued)) {
 			req = next_request(&dep->req_queued);
 
+			dev_dbg(dwc->dev, "First shutdown\n");
 			dwc3_gadget_giveback(dep, req, -ESHUTDOWN);
 		}
 	}
@@ -567,6 +569,7 @@ static void dwc3_remove_requests(struct dwc3 *dwc, struct dwc3_ep *dep)
 	while (!list_empty(&dep->request_list)) {
 		req = next_request(&dep->request_list);
 
+		dev_dbg(dwc->dev, "Second shutdown\n");
 		dwc3_gadget_giveback(dep, req, -ESHUTDOWN);
 	}
 }
