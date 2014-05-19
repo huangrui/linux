@@ -2232,8 +2232,8 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 			"TEST 9:  ch9 (subset) control tests, %d times\n",
 				param->iterations);
 		/* Update to 1 time for debug */
-		//for (i = param->iterations; retval == 0 && i--; /* NOP */)
-		for (i = 1; retval == 0 && i--; /* NOP */)
+		//for (i = 1; retval == 0 && i--; /* NOP */)
+		for (i = param->iterations; retval == 0 && i--; /* NOP */)
 			retval = ch9_postconfig(dev);
 		if (retval)
 			dev_err(&intf->dev, "ch9 subset failed, "
