@@ -412,6 +412,7 @@ static ssize_t dwc3_mode_write(struct file *file,
 
 	if (mode) {
 		spin_lock_irqsave(&dwc->lock, flags);
+		dwc3_core_soft_reset(dwc);
 		dwc3_set_mode(dwc, mode);
 		spin_unlock_irqrestore(&dwc->lock, flags);
 	}
