@@ -412,8 +412,11 @@ static ssize_t dwc3_mode_write(struct file *file,
 
 	if (mode) {
 		spin_lock_irqsave(&dwc->lock, flags);
-		dwc3_core_soft_reset(dwc);
-		dwc3_set_mode(dwc, mode);
+		if (mode == DWC3_GCTL_PRTCAP_DEVICE) {
+			dwc3_to_device(dwc);
+		} else if (mode == DWC3_GCTL_PRTCAP_HOST) {
+			dwc3_to_host(dwc);
+		}
 		spin_unlock_irqrestore(&dwc->lock, flags);
 	}
 	return count;
@@ -649,7 +652,8 @@ int dwc3_debugfs_init(struct dwc3 *dwc)
 		goto err1;
 	}
 
-	if (IS_ENABLED(CONFIG_USB_DWC3_DUAL_ROLE)) {
+	if (IS_ENABLED(CONFIG_USB_DWC3_DUAL_ROLE) ||
+			IS_ENABLED(CONFIG_USB_DWC3_GADGET)) {
 		file = debugfs_create_file("mode", S_IRUGO | S_IWUSR, root,
 				dwc, &dwc3_mode_fops);
 		if (!file) {
