@@ -412,6 +412,10 @@ static int dwc3_core_init(struct dwc3 *dwc)
 
 	dwc3_writel(dwc->regs, DWC3_GCTL, reg);
 
+	reg = dwc3_readl(dwc->regs, DWC3_OEVTEN);
+	reg |= DWC3_OEVTEN_BDEVVBUSCHNGEVNTEN;
+	dwc3_writel(dwc->regs, DWC3_OEVTEN, reg);
+
 	return 0;
 
 err0:
