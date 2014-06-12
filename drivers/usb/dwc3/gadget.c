@@ -2594,6 +2594,7 @@ int dwc3_gadget_init(struct dwc3 *dwc)
 		goto err3;
 	}
 
+	dwc->has_gadget			= true;
 	dwc->gadget.ops			= &dwc3_gadget_ops;
 	dwc->gadget.max_speed		= USB_SPEED_SUPER;
 	dwc->gadget.speed		= USB_SPEED_UNKNOWN;
@@ -2651,6 +2652,7 @@ err0:
 
 void dwc3_gadget_exit(struct dwc3 *dwc)
 {
+	dwc->has_gadget = false;
 	usb_del_gadget_udc(&dwc->gadget);
 
 	dwc3_gadget_free_endpoints(dwc);
