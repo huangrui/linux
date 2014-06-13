@@ -1603,6 +1603,15 @@ err0:
 	return ret;
 }
 
+
+int dwc3_gadget_stop_on_switch(struct dwc3 dwc3)
+{
+	__dwc3_gadget_ep_disable(dwc->eps[0]);
+	__dwc3_gadget_ep_disable(dwc->eps[1]);
+
+	return 0;
+}
+
 static int dwc3_gadget_stop(struct usb_gadget *g,
 		struct usb_gadget_driver *driver)
 {
