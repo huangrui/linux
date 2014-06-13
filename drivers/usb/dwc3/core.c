@@ -257,10 +257,10 @@ int dwc3_to_host(struct dwc3 *dwc)
 {
 	int ret;
 
-	if (dwc->xhci)
+	if (dwc->has_xhci)
 		dwc3_host_exit(dwc);
 	if (dwc->has_gadget)
-		dwc3_gadget_exit(dwc);
+		dwc3_gadget_stop_on_switch(dwc);
 
 	dwc3_core_soft_reset(dwc);
 
@@ -287,11 +287,11 @@ int dwc3_to_device(struct dwc3 *dwc)
 	unsigned long timeout;
 	u32 reg;
 
-	if (dwc->xhci)
+	if (dwc->has_xhci)
 		dwc3_host_exit(dwc);
 	dev_dbg(dwc->dev, "has_gadget=%d, in to_device\n", dwc->has_gadget);
 	if (dwc->has_gadget)
-		dwc3_gadget_exit(dwc);
+		dwc3_gadget_stop_on_switch(dwc);
 
 	dwc3_core_soft_reset(dwc);
 
@@ -320,7 +320,7 @@ int dwc3_to_device(struct dwc3 *dwc)
 		cpu_relax();
 	} while (true);
 
-	ret = dwc3_gadget_init(dwc);
+	ret = dwc3_gadget_restart(dwc);
 	if (ret) {
 		dev_err(dwc->dev, "failed to init gadget\n");
 		goto err0;

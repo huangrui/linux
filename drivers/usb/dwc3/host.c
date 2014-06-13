@@ -38,6 +38,7 @@ int dwc3_host_init(struct dwc3 *dwc)
 	xhci->dev.dma_parms	= dwc->dev->dma_parms;
 
 	dwc->xhci = xhci;
+	dwc->has_xhci = true;
 
 	ret = platform_device_add_resources(xhci, dwc->xhci_resources,
 						DWC3_XHCI_RESOURCES_NUM);
@@ -63,5 +64,6 @@ err0:
 
 void dwc3_host_exit(struct dwc3 *dwc)
 {
+	dwc->has_xhci = false;
 	platform_device_unregister(dwc->xhci);
 }

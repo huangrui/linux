@@ -99,6 +99,9 @@ int dwc3_send_gadget_ep_cmd(struct dwc3 *dwc, unsigned ep,
 		unsigned cmd, struct dwc3_gadget_ep_cmd_params *params);
 int dwc3_send_gadget_generic_command(struct dwc3 *dwc, int cmd, u32 param);
 
+int dwc3_gadget_restart(struct dwc3 *dwc);
+int dwc3_gadget_stop_on_switch(struct dwc3 *dwc);
+
 /**
  * dwc3_gadget_ep_get_transfer_index - Gets transfer index from HW
  * @dwc: DesignWare USB3 Pointer

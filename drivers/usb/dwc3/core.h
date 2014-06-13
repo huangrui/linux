@@ -758,6 +758,7 @@ struct dwc3 {
 #define DWC3_REVISION_250A	0x5533250a
 
 	bool			has_gadget;
+	bool			has_xhci;
 	unsigned		is_selfpowered:1;
 	unsigned		three_stage_setup:1;
 	unsigned		ep0_bounced:1;

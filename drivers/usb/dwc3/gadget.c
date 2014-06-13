@@ -1484,6 +1484,7 @@ int dwc3_gadget_restart(struct dwc3 *dwc)
 	u32			reg;
 	struct dwc3_ep		*dep;
 
+	dwc->has_gadget = true;
 	reg = dwc3_readl(dwc->regs, DWC3_DCFG);
 	reg &= ~(DWC3_DCFG_SPEED_MASK);
 
@@ -1604,8 +1605,9 @@ err0:
 }
 
 
-int dwc3_gadget_stop_on_switch(struct dwc3 dwc3)
+int dwc3_gadget_stop_on_switch(struct dwc3 *dwc)
 {
+	dwc->has_gadget = false;
 	__dwc3_gadget_ep_disable(dwc->eps[0]);
 	__dwc3_gadget_ep_disable(dwc->eps[1]);
 
