@@ -289,6 +289,7 @@ int dwc3_to_device(struct dwc3 *dwc)
 
 	if (dwc->xhci)
 		dwc3_host_exit(dwc);
+	dev_dbg(dwc->dev, "has_gadget=%d, in to_device\n", dwc->has_gadget);
 	if (dwc->has_gadget)
 		dwc3_gadget_exit(dwc);
 
