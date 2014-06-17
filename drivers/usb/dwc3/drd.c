@@ -48,7 +48,7 @@
 #include "drd.h"
 
 
-int dwc3_to_host(struct dwc3 *dwc)
+int dwc3_drd_to_host(struct dwc3 *dwc)
 {
 	int ret;
 
@@ -76,7 +76,7 @@ err0:
 	return ret;
 }
 
-int dwc3_to_device(struct dwc3 *dwc)
+int dwc3_drd_to_device(struct dwc3 *dwc)
 {
 	int ret;
 	unsigned long timeout;

@@ -414,9 +414,9 @@ static ssize_t dwc3_mode_write(struct file *file,
 	if (mode) {
 		spin_lock_irqsave(&dwc->lock, flags);
 		if (mode == DWC3_GCTL_PRTCAP_DEVICE) {
-			dwc3_to_device(dwc);
+			dwc3_drd_to_device(dwc);
 		} else if (mode == DWC3_GCTL_PRTCAP_HOST) {
-			dwc3_to_host(dwc);
+			dwc3_drd_to_host(dwc);
 		}
 		spin_unlock_irqrestore(&dwc->lock, flags);
 	}

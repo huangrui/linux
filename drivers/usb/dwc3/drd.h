@@ -32,8 +32,8 @@
 #include "gadget.h"
 #include "io.h"
 
-extern int dwc3_to_host(struct dwc3 *dwc);
-extern int dwc3_to_device(struct dwc3 *dwc);
+extern int dwc3_drd_to_host(struct dwc3 *dwc);
+extern int dwc3_drd_to_device(struct dwc3 *dwc);
 
 #endif /* __DRIVERS_USB_DWC3_CORE_H */
 
