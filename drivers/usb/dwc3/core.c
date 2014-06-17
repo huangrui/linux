@@ -295,12 +295,6 @@ int dwc3_to_device(struct dwc3 *dwc)
 
 	dwc3_core_soft_reset(dwc);
 
-	ret = dwc3_event_buffers_setup(dwc);
-	if (ret) {
-		dev_err(dwc->dev, "failed to setup event buffers\n");
-		goto err0;
-	}
-
 	dwc3_set_mode(dwc, DWC3_GCTL_PRTCAP_DEVICE);
 
 	/* issue device SoftReset too */
@@ -319,6 +313,12 @@ int dwc3_to_device(struct dwc3 *dwc)
 
 		cpu_relax();
 	} while (true);
+
+	ret = dwc3_event_buffers_setup(dwc);
+	if (ret) {
+		dev_err(dwc->dev, "failed to setup event buffers\n");
+		goto err0;
+	}
 
 	ret = dwc3_gadget_restart(dwc);
 	if (ret) {
