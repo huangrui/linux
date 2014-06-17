@@ -32,6 +32,7 @@
 #include "gadget.h"
 #include "io.h"
 #include "debug.h"
+#include "drd.h"
 
 #define dump_register(nm)				\
 {							\

@@ -210,7 +210,7 @@ static int dwc3_alloc_event_buffers(struct dwc3 *dwc, unsigned length)
  *
  * Returns 0 on success otherwise negative errno.
  */
-static int dwc3_event_buffers_setup(struct dwc3 *dwc)
+int dwc3_event_buffers_setup(struct dwc3 *dwc)
 {
 	struct dwc3_event_buffer	*evt;
 	int				n;
@@ -251,82 +251,6 @@ static void dwc3_event_buffers_cleanup(struct dwc3 *dwc)
 				| DWC3_GEVNTSIZ_SIZE(0));
 		dwc3_writel(dwc->regs, DWC3_GEVNTCOUNT(n), 0);
 	}
-}
-
-int dwc3_to_host(struct dwc3 *dwc)
-{
-	int ret;
-
-	if (dwc->has_xhci)
-		dwc3_host_exit(dwc);
-	if (dwc->has_gadget)
-		dwc3_gadget_stop_on_switch(dwc);
-
-	dwc3_core_soft_reset(dwc);
-
-	ret = dwc3_event_buffers_setup(dwc);
-	if (ret) {
-		dev_err(dwc->dev, "failed to setup event buffers\n");
-		goto err0;
-	}
-
-	dwc3_set_mode(dwc, DWC3_GCTL_PRTCAP_HOST);
-
-	ret = dwc3_host_init(dwc);
-	if (ret) {
-		dev_err(dwc->dev, "failed to init host\n");
-		goto err0;
-	}
-err0:
-	return ret;
-}
-
-int dwc3_to_device(struct dwc3 *dwc)
-{
-	int ret;
-	unsigned long timeout;
-	u32 reg;
-
-	if (dwc->has_xhci)
-		dwc3_host_exit(dwc);
-	dev_dbg(dwc->dev, "has_gadget=%d, in to_device\n", dwc->has_gadget);
-	if (dwc->has_gadget)
-		dwc3_gadget_stop_on_switch(dwc);
-
-	dwc3_core_soft_reset(dwc);
-
-	dwc3_set_mode(dwc, DWC3_GCTL_PRTCAP_DEVICE);
-
-	/* issue device SoftReset too */
-	timeout = jiffies + msecs_to_jiffies(500);
-	dwc3_writel(dwc->regs, DWC3_DCTL, DWC3_DCTL_CSFTRST);
-	do {
-		reg = dwc3_readl(dwc->regs, DWC3_DCTL);
-		if (!(reg & DWC3_DCTL_CSFTRST))
-			break;
-
-		if (time_after(jiffies, timeout)) {
-			dev_err(dwc->dev, "Reset Timed Out\n");
-			ret = -ETIMEDOUT;
-			goto err0;
-		}
-
-		cpu_relax();
-	} while (true);
-
-	ret = dwc3_event_buffers_setup(dwc);
-	if (ret) {
-		dev_err(dwc->dev, "failed to setup event buffers\n");
-		goto err0;
-	}
-
-	ret = dwc3_gadget_restart(dwc);
-	if (ret) {
-		dev_err(dwc->dev, "failed to init gadget\n");
-		goto err0;
-	}
-err0:
-	return ret;
 }
 
 static void dwc3_core_num_eps(struct dwc3 *dwc)
