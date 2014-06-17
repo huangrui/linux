@@ -1,5 +1,5 @@
 /**
- * drd.c - Dual Role Switch funciton File
+ * drd.c - Dual Role Switch Funciton File
  *
  * Copyright 2014 Advanced Micro Devices, Inc.
  *
