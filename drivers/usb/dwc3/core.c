@@ -102,12 +102,17 @@ void dwc3_core_soft_reset(struct dwc3 *dwc)
 	dwc3_writel(dwc->regs, DWC3_GCTL, reg);
 }
 
+/* Configure USB3 PHY Interface by HW */
 static void dwc3_core_set_pipe3_by_amd(struct dwc3 *dwc)
 {
-	u32		reg;
+	u32		reg = 0;
 
-	/* Assert USB3 PHY by HW */
-	reg = 0x2a0c0102;
+	reg |= DWC3_GUSB3PIPECTL_U2SSINP3OK | DWC3_GUSB3PIPECTL_UX_EXITINPX
+		| DWC3_GUSB3PIPECTL_UX_EXITINPX | DWC3_GUSB3PIPECTL_U1U2EXITFAIL
+		| DWC3_GUSB3PIPECTL_DEPOCHANGE | DWC3_GUSB3PIPECTL_RX_DETOPOLL;
+
+	reg |= DWC3_GUSB3PIPECTL_DEP1P2P3(1) | DWC3_GUSB3PIPECTL_TX_DEEPH(1);
+
 	dwc3_writel(dwc->regs, DWC3_GUSB3PIPECTL(0), reg);
 
 	mdelay(100);
