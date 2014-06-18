@@ -124,3 +124,25 @@ err0:
 	return ret;
 }
 
+int dwc3_drd_to_otg(struct dwc3 *dwc)
+{
+	int ret = 0;
+
+	if (dwc->has_xhci)
+		dwc3_host_exit(dwc);
+	if (dwc->has_gadget)
+		dwc3_gadget_stop_on_switch(dwc);
+
+	dwc3_core_soft_reset(dwc);
+
+	ret = dwc3_event_buffers_setup(dwc);
+	if (ret) {
+		dev_err(dwc->dev, "failed to setup event buffers\n");
+		goto err0;
+	}
+
+	dwc3_set_mode(dwc, DWC3_GCTL_PRTCAP_OTG);
+
+err0:
+	return ret;
+}
