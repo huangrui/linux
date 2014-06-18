@@ -1,5 +1,5 @@
 /**
- * drd.h - Dual Role Switch Funciton Header
+ * drd.h - DesignWare USB3 DRD Controller Dual Role Switch Funciton Header
  *
  * Copyright 2014 Advanced Micro Devices, Inc.
  *

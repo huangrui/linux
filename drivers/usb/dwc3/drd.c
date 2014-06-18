@@ -1,5 +1,5 @@
 /**
- * drd.c - Dual Role Switch Funciton File
+ * drd.c - DesignWare USB3 DRD Controller Dual Role Switch Funciton File
  *
  * Copyright 2014 Advanced Micro Devices, Inc.
  *
