@@ -655,8 +655,7 @@ int dwc3_debugfs_init(struct dwc3 *dwc)
 		goto err1;
 	}
 
-	if (IS_ENABLED(CONFIG_USB_DWC3_DUAL_ROLE) ||
-			IS_ENABLED(CONFIG_USB_DWC3_GADGET)) {
+	if (IS_ENABLED(CONFIG_USB_DWC3_DUAL_ROLE)) {
 		file = debugfs_create_file("mode", S_IRUGO | S_IWUSR, root,
 				dwc, &dwc3_mode_fops);
 		if (!file) {
