@@ -143,6 +143,12 @@ int dwc3_drd_to_otg(struct dwc3 *dwc)
 
 	dwc3_set_mode(dwc, DWC3_GCTL_PRTCAP_OTG);
 
+	ret = dwc3_host_init(dwc);
+	if (ret) {
+		dev_err(dwc->dev, "failed to init host\n");
+		goto err0;
+	}
+
 err0:
 	return ret;
 }
