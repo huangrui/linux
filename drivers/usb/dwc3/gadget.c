@@ -2718,6 +2718,7 @@ static irqreturn_t dwc3_interrupt(int irq, void *_dwc)
  */
 int dwc3_gadget_init(struct dwc3 *dwc)
 {
+	u32					reg;
 	int					ret;
 
 	dwc->ctrl_req = dma_alloc_coherent(dwc->dev, sizeof(*dwc->ctrl_req),
@@ -2771,6 +2772,13 @@ int dwc3_gadget_init(struct dwc3 *dwc)
 	ret = dwc3_gadget_init_endpoints(dwc);
 	if (ret)
 		goto err4;
+
+	if (dwc->quirks & DWC3_AMD_NL_PLAT) {
+		reg = dwc3_readl(dwc->regs, DWC3_DCTL);
+		reg |= DWC3_DCTL_LPM_ERRATA(0xf);
+		dwc3_writel(dwc->regs, DWC3_DCTL, reg);
+	} else
+		reg = 0;
 
 	ret = usb_add_gadget_udc(dwc->dev, &dwc->gadget);
 	if (ret) {

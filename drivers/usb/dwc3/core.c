@@ -116,6 +116,25 @@ static int dwc3_core_soft_reset(struct dwc3 *dwc)
 }
 
 /**
+ * dwc3_core_nl_set_pipe3 - Configure USB3 PHY Interface for NL
+ * @dwc: Pointer to our controller context structure
+ */
+static void dwc3_core_nl_set_pipe3(struct dwc3 *dwc)
+{
+	u32 reg = 0;
+
+	reg |= DWC3_GUSB3PIPECTL_U2SSINP3OK | DWC3_GUSB3PIPECTL_UX_EXITINPX
+		| DWC3_GUSB3PIPECTL_UX_EXITINPX | DWC3_GUSB3PIPECTL_U1U2EXITFAIL
+		| DWC3_GUSB3PIPECTL_DEPOCHANGE | DWC3_GUSB3PIPECTL_RX_DETOPOLL;
+
+	reg |= DWC3_GUSB3PIPECTL_DEP1P2P3(1) | DWC3_GUSB3PIPECTL_TX_DEEPH(1);
+
+	dwc3_writel(dwc->regs, DWC3_GUSB3PIPECTL(0), reg);
+
+	mdelay(100);
+}
+
+/**
  * dwc3_free_one_event_buffer - Frees one event buffer
  * @dwc: Pointer to our controller context structure
  * @evt: Pointer to event buffer to be freed
@@ -419,9 +438,19 @@ static int dwc3_core_init(struct dwc3 *dwc)
 	if (ret)
 		goto err0;
 
+	if (dwc->quirks & DWC3_AMD_NL_PLAT)
+		dwc3_core_nl_set_pipe3(dwc);
+
 	reg = dwc3_readl(dwc->regs, DWC3_GCTL);
+
 	reg &= ~DWC3_GCTL_SCALEDOWN_MASK;
-	reg &= ~DWC3_GCTL_DISSCRAMBLE;
+
+	if (dwc->quirks & DWC3_AMD_NL_PLAT) {
+		reg |= DWC3_GCTL_DISSCRAMBLE;
+		reg |= DWC3_GCTL_U2EXIT_LFPS;
+		reg |= DWC3_GCTL_GBLHIBERNATIONEN;
+	} else
+		reg &= ~DWC3_GCTL_DISSCRAMBLE;
 
 	switch (DWC3_GHWPARAMS1_EN_PWROPT(dwc->hwparams.hwparams1)) {
 	case DWC3_GHWPARAMS1_EN_PWROPT_CLK:
@@ -702,6 +731,8 @@ static int dwc3_probe(struct platform_device *pdev)
 
 		dwc->needs_fifo_resize = pdata->tx_fifo_resize;
 		dwc->dr_mode = pdata->dr_mode;
+
+		dwc->quirks = pdata->quirks;
 	}
 
 	/* default to superspeed if no maximum_speed passed */
