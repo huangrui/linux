@@ -104,4 +104,7 @@ static inline u32 dwc3_gadget_ep_get_transfer_index(struct dwc3 *dwc, u8 number)
 	return DWC3_DEPCMD_GET_RSC_IDX(res_id);
 }
 
+int dwc3_gadget_restart(struct dwc3 *dwc);
+int dwc3_gadget_stop_on_switch(struct dwc3 *dwc);
+
 #endif /* __DRIVERS_USB_DWC3_GADGET_H */
