@@ -35,6 +35,7 @@ struct dwc3_exynos {
 	struct device		*dev;
 
 	struct clk		*clk;
+	struct clk		*sclk;
 	struct regulator	*vdd33;
 	struct regulator	*vdd10;
 };
@@ -139,10 +140,21 @@ static int dwc3_exynos_probe(struct platform_device *pdev)
 		return -EINVAL;
 	}
 
+	/*
+	 * Exynos7 has a special gate clock going to this IP,
+	 * which in earlier SoCs was probably concealed.
+	 */
+	exynos->sclk = devm_clk_get(dev, "usbdrd30_sclk");
+	if (IS_ERR(exynos->sclk)) {
+		dev_info(dev, "no sclk specified\n");
+		exynos->sclk = NULL;
+	}
+
 	exynos->dev	= dev;
 	exynos->clk	= clk;
 
 	clk_prepare_enable(exynos->clk);
+	clk_prepare_enable(exynos->sclk);
 
 	exynos->vdd33 = devm_regulator_get(dev, "vdd33");
 	if (IS_ERR(exynos->vdd33)) {
@@ -185,6 +197,7 @@ err4:
 err3:
 	regulator_disable(exynos->vdd33);
 err2:
+	clk_disable_unprepare(exynos->sclk);
 	clk_disable_unprepare(clk);
 	return ret;
 }
@@ -197,6 +210,7 @@ static int dwc3_exynos_remove(struct platform_device *pdev)
 	platform_device_unregister(exynos->usb2_phy);
 	platform_device_unregister(exynos->usb3_phy);
 
+	clk_disable_unprepare(exynos->sclk);
 	clk_disable_unprepare(exynos->clk);
 
 	regulator_disable(exynos->vdd33);
@@ -218,6 +232,7 @@ static int dwc3_exynos_suspend(struct device *dev)
 {
 	struct dwc3_exynos *exynos = dev_get_drvdata(dev);
 
+	clk_disable(exynos->sclk);
 	clk_disable(exynos->clk);
 
 	regulator_disable(exynos->vdd33);
@@ -243,6 +258,7 @@ static int dwc3_exynos_resume(struct device *dev)
 	}
 
 	clk_enable(exynos->clk);
+	clk_enable(exynos->sclk);
 
 	/* runtime set active to reflect active state. */
 	pm_runtime_disable(dev);
