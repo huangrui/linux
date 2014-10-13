@@ -1144,6 +1144,10 @@ static int dwc3_gadget_ep_queue(struct usb_ep *ep, struct usb_request *request,
 		return -ESHUTDOWN;
 	}
 
+	if (WARN(req->dep != dep, "request %p belongs to '%s'\n",
+				request, req->dep->name))
+		return -EINVAL;
+
 	dev_vdbg(dwc->dev, "queing request %p to %s length %d\n",
 			request, ep->name, request->length);
 	trace_dwc3_ep_queue(req);
