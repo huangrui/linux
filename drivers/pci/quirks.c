@@ -378,6 +378,26 @@ static void quirk_ati_exploding_mce(struct pci_dev *dev)
 }
 DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_ATI,	PCI_DEVICE_ID_ATI_RS100,   quirk_ati_exploding_mce);
 
+/* FIXME should define in <linux/pci_ids.h> */
+#define PCI_DEVICE_ID_AMD_NL	0x7912
+
+/*
+ * AMD NL SoC 7912 PCI device is dwc3 controller, but the class code of PCI
+ * header is 0x0c0330, the same with xHC. That's because it need to meet the
+ * windows enviroment. The dwc3 controller acted as only host mode to bind with
+ * windows xhci driver. But on linux, sometimes, we auto-bind with xhci driver
+ * as well (class code 0x0c0330) despite we use Pid/Vid on dwc3 driver. So this
+ * quirk used a dummy class code to avoid to bind with xhci driver at booting
+ * phase.
+ */
+static void quirk_amd_nl_class(struct pci_dev *pdev)
+{
+	/* Use a dummy class value instead of PCI header provided */
+	pdev->class = 0x0c03fe;
+}
+DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_AMD, PCI_DEVICE_ID_AMD_NL,
+		quirk_amd_nl_class);
+
 /*
  * Let's make the southbridge information explicit instead
  * of having to worry about people probing the ACPI areas,
