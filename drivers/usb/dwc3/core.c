@@ -708,11 +708,13 @@ static int dwc3_probe(struct platform_device *pdev)
 
 	if (node) {
 		dwc->maximum_speed = of_usb_get_maximum_speed(node);
+		dwc->has_lpm_erratum = of_property_read_bool(node, "snps,has-lpm-erratum");
 
 		dwc->needs_fifo_resize = of_property_read_bool(node, "tx-fifo-resize");
 		dwc->dr_mode = of_usb_get_dr_mode(node);
 	} else if (pdata) {
 		dwc->maximum_speed = pdata->maximum_speed;
+		dwc->has_lpm_erratum = pdata->has_lpm_erratum;
 
 		dwc->needs_fifo_resize = pdata->tx_fifo_resize;
 		dwc->dr_mode = pdata->dr_mode;

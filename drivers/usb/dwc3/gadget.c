@@ -1581,6 +1581,13 @@ static int dwc3_gadget_start(struct usb_gadget *g,
 	}
 	dwc3_writel(dwc->regs, DWC3_DCFG, reg);
 
+	if (dwc->has_lpm_erratum) {
+		reg = dwc3_readl(dwc->regs, DWC3_DCTL);
+		/* REVISIT should this be configurable ? */
+		reg |= DWC3_DCTL_LPM_ERRATA(0xf);
+		dwc3_writel(dwc->regs, DWC3_DCTL, reg);
+	}
+
 	dwc->start_config_issued = false;
 
 	/* Start with SuperSpeed Default */

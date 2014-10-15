@@ -148,6 +148,7 @@ static int dwc3_pci_probe(struct pci_dev *pci,
 
 	if (pci->vendor == PCI_VENDOR_ID_AMD && pci->device ==
 			PCI_DEVICE_ID_AMD_NL) {
+		dwc3_pdata.has_lpm_erratum = true;
 		dwc3_pdata.quirks |= DWC3_QUIRK_AMD_NL;
 	}
 

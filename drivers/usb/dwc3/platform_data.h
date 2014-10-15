@@ -25,6 +25,7 @@ struct dwc3_platform_data {
 	enum usb_dr_mode dr_mode;
 	bool tx_fifo_resize;
 
+	unsigned has_lpm_erratum:1;
 	u32     quirks;
 
 #define DWC3_QUIRK_AMD_NL		(1 << 0)
