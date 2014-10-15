@@ -710,6 +710,8 @@ static int dwc3_probe(struct platform_device *pdev)
 
 		dwc->needs_fifo_resize = pdata->tx_fifo_resize;
 		dwc->dr_mode = pdata->dr_mode;
+
+		dwc->quirks = pdata->quirks;
 	}
 
 	/* default to superspeed if no maximum_speed passed */
