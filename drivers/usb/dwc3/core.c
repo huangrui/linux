@@ -467,6 +467,10 @@ static int dwc3_core_init(struct dwc3 *dwc)
 		reg |= DWC3_GCTL_DISSCRAMBLE;
 	else
 		reg &= ~DWC3_GCTL_DISSCRAMBLE;
+
+	if (dwc->quirks & DWC3_QUIRK_U2EXIT_LFPS)
+		reg |= DWC3_GCTL_U2EXIT_LFPS;
+
 	/*
 	 * WORKAROUND: DWC3 revisions <1.90a have a bug
 	 * where the device can fail to connect at SuperSpeed

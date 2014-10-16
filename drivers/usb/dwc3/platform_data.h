@@ -30,5 +30,6 @@ struct dwc3_platform_data {
 
 #define DWC3_QUIRK_AMD_NL		(1 << 0)
 #define DWC3_QUIRK_DISSCRAMBLE		(1 << 1)
+#define DWC3_QUIRK_U2EXIT_LFPS		(1 << 2)
 
 };
