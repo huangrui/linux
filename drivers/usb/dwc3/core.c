@@ -389,6 +389,9 @@ static void dwc3_phy_setup(struct dwc3 *dwc)
 	if (dwc->quirks & DWC3_QUIRK_LFPSFILT)
 		reg |= DWC3_GUSB3PIPECTL_LFPSFILT;
 
+	if (dwc->quirks & DWC3_QUIRK_RX_DETOPOLL)
+		reg |= DWC3_GUSB3PIPECTL_RX_DETOPOLL;
+
 	dwc3_writel(dwc->regs, DWC3_GUSB3PIPECTL(0), reg);
 
 	mdelay(100);

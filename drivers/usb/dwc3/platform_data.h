@@ -36,5 +36,6 @@ struct dwc3_platform_data {
 #define DWC3_QUIRK_DEPP1P2P3		(1 << 5)
 #define DWC3_QUIRK_DEPOCHANGE		(1 << 6)
 #define DWC3_QUIRK_LFPSFILT		(1 << 7)
+#define DWC3_QUIRK_RX_DETOPOLL		(1 << 8)
 
 };
