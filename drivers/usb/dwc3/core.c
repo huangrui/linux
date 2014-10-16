@@ -395,6 +395,9 @@ static void dwc3_phy_setup(struct dwc3 *dwc)
 	if (dwc->quirks & DWC3_QUIRK_TX_DEEPH)
 		reg |= DWC3_GUSB3PIPECTL_TX_DEEPH(1);
 
+	if (dwc->quirks & DWC3_QUIRK_SUSPHY)
+		reg |= DWC3_GUSB3PIPECTL_SUSPHY;
+
 	dwc3_writel(dwc->regs, DWC3_GUSB3PIPECTL(0), reg);
 
 	mdelay(100);
@@ -496,8 +499,10 @@ static int dwc3_core_init(struct dwc3 *dwc)
 		dwc->is_fpga = true;
 	}
 
-	if ((dwc->quirks & DWC3_QUIRK_AMD_NL) && dwc->is_fpga)
+	if ((dwc->quirks & DWC3_QUIRK_AMD_NL) && dwc->is_fpga) {
 		dwc->quirks |= DWC3_QUIRK_DISSCRAMBLE;
+		dwc->quirks &= ~DWC3_QUIRK_SUSPHY;
+	}
 
 	if (dwc->quirks & DWC3_QUIRK_DISSCRAMBLE)
 		reg |= DWC3_GCTL_DISSCRAMBLE;
