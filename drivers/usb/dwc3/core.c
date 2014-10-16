@@ -365,6 +365,24 @@ static void dwc3_cache_hwparams(struct dwc3 *dwc)
 }
 
 /**
+ * dwc3_phy_setup - Configure USB3 PHY Interface of DWC3 Core
+ * @dwc: Pointer to our controller context structure
+ */
+static void dwc3_phy_setup(struct dwc3 *dwc)
+{
+	u32 reg;
+
+	reg = dwc3_readl(dwc->regs, DWC3_GUSB3PIPECTL(0));
+
+	if (dwc->quirks & DWC3_QUIRK_U2SSINP3OK)
+		reg |= DWC3_GUSB3PIPECTL_U2SSINP3OK;
+
+	dwc3_writel(dwc->regs, DWC3_GUSB3PIPECTL(0), reg);
+
+	mdelay(100);
+}
+
+/**
  * dwc3_core_init - Low-level initialization of DWC3 Core
  * @dwc: Pointer to our controller context structure
  *
@@ -483,6 +501,8 @@ static int dwc3_core_init(struct dwc3 *dwc)
 	dwc3_core_num_eps(dwc);
 
 	dwc3_writel(dwc->regs, DWC3_GCTL, reg);
+
+	dwc3_phy_setup(dwc);
 
 	ret = dwc3_alloc_scratch_buffers(dwc);
 	if (ret)

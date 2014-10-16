@@ -150,7 +150,8 @@ static int dwc3_pci_probe(struct pci_dev *pci,
 			PCI_DEVICE_ID_AMD_NL) {
 		dwc3_pdata.has_lpm_erratum = true;
 		dwc3_pdata.quirks |= DWC3_QUIRK_AMD_NL
-			| DWC3_QUIRK_U2EXIT_LFPS;
+			| DWC3_QUIRK_U2EXIT_LFPS
+			| DWC3_QUIRK_U2SSINP3OK;
 	}
 
 	ret = platform_device_add_resources(dwc3, res, ARRAY_SIZE(res));
