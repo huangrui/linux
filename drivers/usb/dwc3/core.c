@@ -392,6 +392,9 @@ static void dwc3_phy_setup(struct dwc3 *dwc)
 	if (dwc->quirks & DWC3_QUIRK_RX_DETOPOLL)
 		reg |= DWC3_GUSB3PIPECTL_RX_DETOPOLL;
 
+	if (dwc->quirks & DWC3_QUIRK_TX_DEEPH)
+		reg |= DWC3_GUSB3PIPECTL_TX_DEEPH(1);
+
 	dwc3_writel(dwc->regs, DWC3_GUSB3PIPECTL(0), reg);
 
 	mdelay(100);
