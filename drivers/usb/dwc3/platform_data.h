@@ -32,5 +32,6 @@ struct dwc3_platform_data {
 #define DWC3_QUIRK_DISSCRAMBLE		(1 << 1)
 #define DWC3_QUIRK_U2EXIT_LFPS		(1 << 2)
 #define DWC3_QUIRK_U2SSINP3OK		(1 << 3)
+#define DWC3_QUIRK_REQP1P2P3		(1 << 4)
 
 };
