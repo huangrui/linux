@@ -26,4 +26,6 @@ struct dwc3_platform_data {
 	bool tx_fifo_resize;
 
 	unsigned disable_scramble_quirk:1;
+	unsigned has_lpm_erratum:1;
+	unsigned lpm_nyet_thres:4;
 };
