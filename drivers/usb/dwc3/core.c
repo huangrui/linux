@@ -526,6 +526,12 @@ static int dwc3_core_init(struct dwc3 *dwc)
 		dwc->is_fpga = true;
 	}
 
+	if (dwc->amd_nl_plat && dwc->is_fpga) {
+		dwc->disable_scramble_quirk = true;
+		dwc->dis_u3_susphy_quirk = true;
+		dwc->dis_u2_susphy_quirk = true;
+	}
+
 	WARN_ONCE(dwc->disable_scramble_quirk && !dwc->is_fpga,
 			"disable_scramble cannot be used on non-FPGA builds\n");
 
@@ -817,6 +823,8 @@ static int dwc3_probe(struct platform_device *pdev)
 				"snps,dis_u3_susphy_quirk");
 		dwc->dis_u2_susphy_quirk = of_property_read_bool(node,
 				"snps,dis_u2_susphy_quirk");
+		dwc->amd_nl_plat = of_property_read_bool(node,
+				"snps,amd_nl_plat");
 
 		dwc->tx_deemph_quirk = of_property_read_bool(node,
 				"snps,tx_deemph_quirk");
@@ -841,6 +849,7 @@ static int dwc3_probe(struct platform_device *pdev)
 		dwc->rx_detect_poll_quirk = pdata->rx_detect_poll_quirk;
 		dwc->dis_u3_susphy_quirk = pdata->dis_u3_susphy_quirk;
 		dwc->dis_u2_susphy_quirk = pdata->dis_u2_susphy_quirk;
+		dwc->amd_nl_plat = pdata->amd_nl_plat;
 
 		dwc->tx_deemph_quirk = pdata->tx_deemph_quirk;
 		if (pdata->tx_deemph)

@@ -699,6 +699,7 @@ struct dwc3_scratchpad_array {
  * @rx_detect_poll_quirk: set if we enable rx_detect to polling lfps quirk
  * @dis_u3_susphy_quirk: set if we disable usb3 suspend phy
  * @dis_u2_susphy_quirk: set if we disable usb2 suspend phy
+ * @amd_nl_plat: set if we use AMD NL platform
  * @tx_deemph_quirk: set if we enable Tx deemphasis quirk
  * @tx_deemph: Tx deemphasis value
  *	0	- -6dB de-emphasis
@@ -822,6 +823,7 @@ struct dwc3 {
 	unsigned		rx_detect_poll_quirk:1;
 	unsigned		dis_u3_susphy_quirk:1;
 	unsigned		dis_u2_susphy_quirk:1;
+	unsigned		amd_nl_plat:1;
 
 	unsigned		tx_deemph_quirk:1;
 	unsigned		tx_deemph:2;

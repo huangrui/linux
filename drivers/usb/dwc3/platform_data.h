@@ -37,6 +37,7 @@ struct dwc3_platform_data {
 	unsigned rx_detect_poll_quirk:1;
 	unsigned dis_u3_susphy_quirk:1;
 	unsigned dis_u2_susphy_quirk:1;
+	unsigned amd_nl_plat:1;
 
 	unsigned tx_deemph_quirk:1;
 	unsigned tx_deemph:2;
