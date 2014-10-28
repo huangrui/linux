@@ -392,6 +392,9 @@ static void dwc3_phy_setup(struct dwc3 *dwc)
 	if (dwc->rx_detect_poll_quirk)
 		reg |= DWC3_GUSB3PIPECTL_RX_DETOPOLL;
 
+	if (dwc->tx_deemph_quirk)
+		reg |= DWC3_GUSB3PIPECTL_TX_DEEPH(dwc->tx_deemph);
+
 	dwc3_writel(dwc->regs, DWC3_GUSB3PIPECTL(0), reg);
 
 	mdelay(100);
@@ -691,6 +694,7 @@ static int dwc3_probe(struct platform_device *pdev)
 	struct resource		*res;
 	struct dwc3		*dwc;
 	u8			lpm_nyet_thres;
+	u8			tx_deemph;
 
 	int			ret;
 
@@ -749,6 +753,9 @@ static int dwc3_probe(struct platform_device *pdev)
 	/* default to highest possible threshold */
 	lpm_nyet_thres = 0xff;
 
+	/* default to -3.5dB de-emphasis */
+	tx_deemph = 1;
+
 	if (node) {
 		dwc->maximum_speed = of_usb_get_maximum_speed(node);
 		dwc->has_lpm_erratum = of_property_read_bool(node,
@@ -776,6 +783,11 @@ static int dwc3_probe(struct platform_device *pdev)
 				"snps,lfps_filter_quirk");
 		dwc->rx_detect_poll_quirk = of_property_read_bool(node,
 				"snps,rx_detect_poll_quirk");
+
+		dwc->tx_deemph_quirk = of_property_read_bool(node,
+				"snps,tx_deemph_quirk");
+		of_property_read_u8(node, "snps,tx_deemph",
+				&tx_deemph);
 	} else if (pdata) {
 		dwc->maximum_speed = pdata->maximum_speed;
 		dwc->has_lpm_erratum = pdata->has_lpm_erratum;
@@ -793,6 +805,10 @@ static int dwc3_probe(struct platform_device *pdev)
 		dwc->del_phy_power_chg_quirk = pdata->del_phy_power_chg_quirk;
 		dwc->lfps_filter_quirk = pdata->lfps_filter_quirk;
 		dwc->rx_detect_poll_quirk = pdata->rx_detect_poll_quirk;
+
+		dwc->tx_deemph_quirk = pdata->tx_deemph_quirk;
+		if (pdata->tx_deemph)
+			tx_deemph = pdata->tx_deemph;
 	}
 
 	/* default to superspeed if no maximum_speed passed */
@@ -800,6 +816,7 @@ static int dwc3_probe(struct platform_device *pdev)
 		dwc->maximum_speed = USB_SPEED_SUPER;
 
 	dwc->lpm_nyet_thres = lpm_nyet_thres;
+	dwc->tx_deemph = tx_deemph;
 
 	ret = dwc3_core_get_phy(dwc);
 	if (ret)
