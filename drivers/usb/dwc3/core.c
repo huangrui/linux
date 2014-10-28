@@ -423,6 +423,10 @@ static void dwc3_phy_setup(struct dwc3 *dwc)
 	if (dwc->revision > DWC3_REVISION_194A)
 		reg |= DWC3_GUSB2PHYCFG_SUSPHY;
 
+	/* FIXME will move FPGA flag when AMD NL taps out */
+	if (dwc->dis_u2_susphy_quirk && dwc->is_fpga)
+		reg &= ~DWC3_GUSB2PHYCFG_SUSPHY;
+
 	dwc3_writel(dwc->regs, DWC3_GUSB2PHYCFG(0), reg);
 
 	mdelay(100);
@@ -815,6 +819,8 @@ static int dwc3_probe(struct platform_device *pdev)
 				"snps,rx_detect_poll_quirk");
 		dwc->dis_u3_susphy_quirk = of_property_read_bool(node,
 				"snps,dis_u3_susphy_quirk");
+		dwc->dis_u2_susphy_quirk = of_property_read_bool(node,
+				"snps,dis_u2_susphy_quirk");
 
 		dwc->tx_de_emphasis_quirk = of_property_read_bool(node,
 				"snps,tx_de_emphasis_quirk");
@@ -838,6 +844,7 @@ static int dwc3_probe(struct platform_device *pdev)
 		dwc->lfps_filter_quirk = pdata->lfps_filter_quirk;
 		dwc->rx_detect_poll_quirk = pdata->rx_detect_poll_quirk;
 		dwc->dis_u3_susphy_quirk = pdata->dis_u3_susphy_quirk;
+		dwc->dis_u2_susphy_quirk = pdata->dis_u2_susphy_quirk;
 
 		dwc->tx_de_emphasis_quirk = pdata->tx_de_emphasis_quirk;
 		if (pdata->tx_de_emphasis)
