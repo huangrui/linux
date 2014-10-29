@@ -497,8 +497,9 @@ static int usbhs_probe(struct platform_device *pdev)
 
 	/* platform data */
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+
 	irq_res = platform_get_resource(pdev, IORESOURCE_IRQ, 0);
-	if (!res || !irq_res) {
+	if (!irq_res) {
 		dev_err(&pdev->dev, "Not enough Renesas USB platform resources.\n");
 		return -ENODEV;
 	}
