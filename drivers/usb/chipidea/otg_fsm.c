@@ -788,10 +788,10 @@ int ci_hdrc_otg_fsm_init(struct ci_hdrc *ci)
 		return -ENOMEM;
 	}
 
-	otg->usb_phy = ci->transceiver;
+	otg->usb_phy = ci->usb_phy;
 	otg->gadget = &ci->gadget;
 	ci->fsm.otg = otg;
-	ci->transceiver->otg = ci->fsm.otg;
+	ci->usb_phy->otg = ci->fsm.otg;
 	ci->fsm.power_up = 1;
 	ci->fsm.id = hw_read_otgsc(ci, OTGSC_ID) ? 1 : 0;
 	ci->fsm.otg->state = OTG_STATE_UNDEFINED;

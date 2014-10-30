@@ -59,7 +59,7 @@ static int host_start(struct ci_hdrc *ci)
 	hcd->has_tt = 1;
 
 	hcd->power_budget = ci->platdata->power_budget;
-	hcd->usb_phy = ci->transceiver;
+	hcd->usb_phy = ci->usb_phy;
 	hcd->tpl_support = ci->platdata->tpl_support;
 
 	ehci = hcd_to_ehci(hcd);
@@ -86,7 +86,7 @@ static int host_start(struct ci_hdrc *ci)
 	if (ret) {
 		goto disable_reg;
 	} else {
-		struct usb_otg *otg = ci->transceiver->otg;
+		struct usb_otg *otg = ci->usb_phy->otg;
 
 		ci->hcd = hcd;
 		if (otg) {
