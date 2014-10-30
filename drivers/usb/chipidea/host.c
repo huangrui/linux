@@ -86,10 +86,11 @@ static int host_start(struct ci_hdrc *ci)
 	if (ret) {
 		goto disable_reg;
 	} else {
-		struct usb_otg *otg = ci->usb_phy->otg;
+		struct usb_otg *otg = &ci->otg;
 
 		ci->hcd = hcd;
-		if (otg) {
+
+		if (ci_otg_is_fsm_mode(ci)) {
 			otg->host = &hcd->self;
 			hcd->self.otg_port = 1;
 		}
