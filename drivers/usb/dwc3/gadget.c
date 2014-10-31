@@ -2300,7 +2300,7 @@ static void dwc3_gadget_conndone_interrupt(struct dwc3 *dwc)
 		/*
 		 * When dwc3 revisions >= 2.40a, LPM Erratum is enabled and
 		 * DCFG.LPMCap is set, core responses with an ACK and the
-		 * BESL value in the LPM token is less than or equal to lPM
+		 * BESL value in the LPM token is less than or equal to LPM
 		 * NYET threshold.
 		 */
 		WARN_ONCE(dwc->revision < DWC3_REVISION_240A

@@ -512,8 +512,13 @@ static int dwc3_core_init(struct dwc3 *dwc)
 			reg &= ~DWC3_GCTL_DSBLCLKGTNG;
 		break;
 	case DWC3_GHWPARAMS1_EN_PWROPT_HIB:
-		/* enable hibernation here */
 		dwc->nr_scratch = DWC3_GHWPARAMS4_HIBER_SCRATCHBUFS(hwparams4);
+		/*
+		 * Enable hibernation here.
+		 *
+		 * Enabling this bit so that host-mode hibernation will
+		 * work, device-mode hibernation is not implemented yet.
+		 */
 		reg |= DWC3_GCTL_GBLHIBERNATIONEN;
 		break;
 	default:
