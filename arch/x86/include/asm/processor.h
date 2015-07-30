@@ -810,6 +810,7 @@ static inline int mpx_disable_management(void)
 
 extern u16 amd_get_nb_id(int cpu);
 extern u32 amd_get_nodes_per_socket(void);
+extern u32 amd_get_cores_per_cu(void);
 
 static inline uint32_t hypervisor_cpuid_base(const char *sig, uint32_t leaves)
 {

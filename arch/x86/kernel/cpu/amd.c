@@ -27,6 +27,9 @@
  */
 static u32 nodes_per_socket = 1;
 
+/* cores_per_cu: stores the number of cores per compute unit */
+static u32 cores_per_cu = 1;
+
 static inline int rdmsrl_amd_safe(unsigned msr, unsigned long long *p)
 {
 	u32 gprs[8] = { 0 };
@@ -299,7 +302,6 @@ static int nearby_node(int apicid)
 #ifdef CONFIG_SMP
 static void amd_get_topology(struct cpuinfo_x86 *c)
 {
-	u32 cores_per_cu = 1;
 	u8 node_id;
 	int cpu = smp_processor_id();
 
@@ -313,7 +315,6 @@ static void amd_get_topology(struct cpuinfo_x86 *c)
 		/* get compute unit information */
 		smp_num_siblings = ((ebx >> 8) & 3) + 1;
 		c->compute_unit_id = ebx & 0xff;
-		cores_per_cu += ((ebx >> 8) & 3);
 	} else if (cpu_has(c, X86_FEATURE_NODEID_MSR)) {
 		u64 value;
 
@@ -390,6 +391,13 @@ u32 amd_get_nodes_per_socket(void)
 	return nodes_per_socket;
 }
 EXPORT_SYMBOL_GPL(amd_get_nodes_per_socket);
+
+/* this function returns the number of cores per compute unit */
+u32 amd_get_cores_per_cu(void)
+{
+	return cores_per_cu;
+}
+EXPORT_SYMBOL_GPL(amd_get_cores_per_cu);
 
 static void srat_detect_node(struct cpuinfo_x86 *c)
 {
@@ -523,10 +531,11 @@ static void bsp_init_amd(struct cpuinfo_x86 *c)
 		use_mwaitx_delay();
 
 	if (boot_cpu_has(X86_FEATURE_TOPOEXT)) {
-		u32 ecx;
+		u32 eax, ebx, ecx, edx;
 
-		ecx = cpuid_ecx(0x8000001e);
+		cpuid(0x8000001e, &eax, &ebx, &ecx, &edx);
 		nodes_per_socket = ((ecx >> 8) & 7) + 1;
+		cores_per_cu = ((ebx >> 8) & 3) + 1;
 	} else if (boot_cpu_has(X86_FEATURE_NODEID_MSR)) {
 		u64 value;
 
