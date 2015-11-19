@@ -26,6 +26,8 @@
 #include <linux/scatterlist.h>
 #include <linux/of.h>
 #include <linux/of_dma.h>
+#include <linux/acpi.h>
+#include <linux/acpi_dma.h>
 #include <linux/err.h>
 #include <linux/pm_runtime.h>
 
@@ -488,6 +490,9 @@ struct pl330_dmac {
 	/* Peripheral channels connected to this DMAC */
 	unsigned int num_peripherals;
 	struct dma_pl330_chan *peripherals; /* keep at end */
+
+	/*IRQ register flags */
+	unsigned int flags;
 };
 
 struct dma_pl330_desc {
@@ -2800,6 +2805,8 @@ pl330_probe(struct amba_device *adev, const struct amba_id *id)
 
 	pl330->mcbufsz = pdat ? pdat->mcbuf_sz : 0;
 
+	pl330->flags = pdat ? pdat->flags : IRQF_TRIGGER_NONE;
+
 	res = &adev->res;
 	pl330->base = devm_ioremap_resource(&adev->dev, res);
 	if (IS_ERR(pl330->base))
@@ -2811,7 +2818,7 @@ pl330_probe(struct amba_device *adev, const struct amba_id *id)
 		irq = adev->irq[i];
 		if (irq) {
 			ret = devm_request_irq(&adev->dev, irq,
-					       pl330_irq_handler, 0,
+					       pl330_irq_handler, pl330->flags,
 					       dev_name(&adev->dev), pl330);
 			if (ret)
 				return ret;

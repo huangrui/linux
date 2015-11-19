@@ -29,6 +29,8 @@ struct dma_pl330_platdata {
 	dma_cap_mask_t cap_mask;
 	/* Bytes to allocate for MC buffer */
 	unsigned mcbuf_sz;
+	/*flags for irq sharing, default is non-shared*/
+	unsigned flags;
 };
 
 extern bool pl330_filter(struct dma_chan *chan, void *param);

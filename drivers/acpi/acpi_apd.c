@@ -20,6 +20,9 @@
 #include <linux/pm.h>
 #include <linux/amba/bus.h>
 #include <linux/dma-mapping.h>
+#include <linux/dmaengine.h>
+#include <linux/interrupt.h>
+#include <linux/amba/pl330.h>
 
 #include "internal.h"
 
@@ -33,6 +36,14 @@ struct apd_private_data;
 #define ACPI_APD_SYSFS	BIT(0)
 #define ACPI_APD_PM	BIT(1)
 
+static u8 peri_id[2] = { 0, 1 };
+
+static struct dma_pl330_platdata amd_pl330 = {
+	.nr_valid_peri = 2,
+	.peri_id = peri_id,
+	.mcbuf_sz = 0,
+	.flags = IRQF_SHARED,
+};
 /**
  * struct apd_device_desc - a descriptor for apd device
  * @flags: device flags like %ACPI_APD_SYSFS, %ACPI_APD_PM
@@ -150,6 +161,12 @@ static int acpi_apd_setup_quirks(struct apd_private_data *pdata)
 		goto amba_register_err;
 
 	kfree(resource);
+
+	dma_cap_set(DMA_MEMCPY, amd_pl330.cap_mask);
+	dma_cap_set(DMA_SLAVE, amd_pl330.cap_mask);
+	dma_cap_set(DMA_CYCLIC, amd_pl330.cap_mask);
+	dma_cap_set(DMA_PRIVATE, amd_pl330.cap_mask);
+
 	return 0;
 
 amba_register_err:
