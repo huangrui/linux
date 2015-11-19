@@ -31,6 +31,10 @@ struct dma_pl330_platdata {
 	unsigned mcbuf_sz;
 	/*flags for irq sharing, default is non-shared*/
 	unsigned flags;
+	/*device base request line*/
+	unsigned short base_request_line;
+	/*device request line range*/
+	unsigned short num;
 };
 
 extern bool pl330_filter(struct dma_chan *chan, void *param);

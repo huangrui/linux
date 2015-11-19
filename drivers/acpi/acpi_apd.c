@@ -38,11 +38,23 @@ struct apd_private_data;
 
 static u8 peri_id[2] = { 0, 1 };
 
-static struct dma_pl330_platdata amd_pl330 = {
-	.nr_valid_peri = 2,
-	.peri_id = peri_id,
-	.mcbuf_sz = 0,
-	.flags = IRQF_SHARED,
+static struct dma_pl330_platdata amd_pl330[] = {
+	{
+		.nr_valid_peri = 2,
+		.peri_id = peri_id,
+		.mcbuf_sz = 0,
+		.flags = IRQF_SHARED,
+		.base_request_line = 1,
+		.num = 0,
+	},
+	{
+		.nr_valid_peri = 2,
+		.peri_id = peri_id,
+		.mcbuf_sz = 0,
+		.flags = IRQF_SHARED,
+		.base_request_line = 2,
+		.num = 0,
+	}
 };
 /**
  * struct apd_device_desc - a descriptor for apd device
@@ -101,6 +113,7 @@ static int acpi_apd_setup_quirks(struct apd_private_data *pdata)
 	unsigned int irq[AMBA_NR_IRQS];
 	struct clk *clk = ERR_PTR(-ENODEV);
 	char amba_devname[100];
+	int devnum;
 
 	resource = kzalloc(sizeof(*resource), GFP_KERNEL);
 	if (!resource)
@@ -131,8 +144,11 @@ static int acpi_apd_setup_quirks(struct apd_private_data *pdata)
 	if (!amba_dev)
 		goto amba_alloc_err;
 
+	devnum = amba_devname[strlen(dev_name(&pdev->dev)) - 1] - '0';
+
 	amba_dev->dev.coherent_dma_mask
 		= acpi_dma_supported(ACPI_COMPANION(&pdev->dev)) ? DMA_BIT_MASK(64) : 0;
+	amba_dev->dev.platform_data = &amd_pl330[devnum];
 	amba_dev->dev.fwnode = acpi_fwnode_handle(ACPI_COMPANION(&pdev->dev));
 
 	amba_dev->dev.parent = &pdev->dev;
@@ -162,10 +178,10 @@ static int acpi_apd_setup_quirks(struct apd_private_data *pdata)
 
 	kfree(resource);
 
-	dma_cap_set(DMA_MEMCPY, amd_pl330.cap_mask);
-	dma_cap_set(DMA_SLAVE, amd_pl330.cap_mask);
-	dma_cap_set(DMA_CYCLIC, amd_pl330.cap_mask);
-	dma_cap_set(DMA_PRIVATE, amd_pl330.cap_mask);
+	dma_cap_set(DMA_MEMCPY, amd_pl330[devnum].cap_mask);
+	dma_cap_set(DMA_SLAVE, amd_pl330[devnum].cap_mask);
+	dma_cap_set(DMA_CYCLIC, amd_pl330[devnum].cap_mask);
+	dma_cap_set(DMA_PRIVATE, amd_pl330[devnum].cap_mask);
 
 	return 0;
 
