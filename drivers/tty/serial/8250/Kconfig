@@ -378,3 +378,11 @@ config SERIAL_8250_MID
 	  Selecting this option will enable handling of the extra features
 	  present on the UART found on Intel Medfield SOC and various other
 	  Intel platforms.
+
+config SERIAL_8250_AMD
+	bool "AMD carrizo serial port support"
+	depends on SERIAL_8250
+	select ARM_AMBA
+	help
+	  If you have a Family 15h, models 0x60-0x6F based board and want to
+	  use the serial port, say Y to this option. If unsure, say N.
