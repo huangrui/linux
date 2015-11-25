@@ -269,6 +269,15 @@ configured less than Maximum supported fifo bytes */
 		.rxtrig_bytes	= {1, 4, 8, 14},
 		.flags		= UART_CAP_FIFO,
 	},
+	[PORT_AMD_8250] = {
+		.name		= "AMD_8250",
+		.fifo_size	= 256,
+		.tx_loadsz	= 128,
+		.fcr		= UART_FCR_ENABLE_FIFO | UART_FCR_R_TRIG_10 |
+				UART_FCR_T_TRIG_11,
+		.rxtrig_bytes	= {1, 4, 8},
+		.flags		= UART_CAP_FIFO,
+	},
 };
 
 /* Uart divisor latch read */

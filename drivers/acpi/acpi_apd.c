@@ -23,6 +23,7 @@
 #include <linux/dmaengine.h>
 #include <linux/interrupt.h>
 #include <linux/amba/pl330.h>
+#include <linux/platform_data/8250-dw.h>
 
 #include "internal.h"
 
@@ -56,6 +57,11 @@ static struct dma_pl330_platdata amd_pl330[] = {
 		.num = 0,
 	}
 };
+
+static struct plat_dw8250_data amd_dw8250 = {
+	.has_pl330_dma = 1,
+};
+
 /**
  * struct apd_device_desc - a descriptor for apd device
  * @flags: device flags like %ACPI_APD_SYSFS, %ACPI_APD_PM
@@ -114,6 +120,11 @@ static int acpi_apd_setup_quirks(struct apd_private_data *pdata)
 	struct clk *clk = ERR_PTR(-ENODEV);
 	char amba_devname[100];
 	int devnum;
+
+	ret = platform_device_add_data(pdev, &amd_dw8250,
+				       sizeof(amd_dw8250));
+	if (ret)
+		goto resource_alloc_err;
 
 	resource = kzalloc(sizeof(*resource), GFP_KERNEL);
 	if (!resource)

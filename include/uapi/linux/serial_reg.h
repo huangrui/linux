@@ -20,6 +20,7 @@
 #define UART_RX		0	/* In:  Receive buffer */
 #define UART_TX		0	/* Out: Transmit buffer */
 
+#define UART_IER_PTIME          0x80  /* Enable Programmable Transmitter holding register int. */
 #define UART_IER	1	/* Out: Interrupt Enable Register */
 #define UART_IER_MSI		0x08 /* Enable Modem status interrupt */
 #define UART_IER_RLSI		0x04 /* Enable receiver line status interrupt */

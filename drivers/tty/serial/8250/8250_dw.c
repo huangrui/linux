@@ -27,6 +27,7 @@
 #include <linux/clk.h>
 #include <linux/reset.h>
 #include <linux/pm_runtime.h>
+#include <linux/platform_data/8250-dw.h>
 
 #include <asm/byteorder.h>
 
@@ -66,6 +67,7 @@ struct dw8250_data {
 
 	unsigned int		skip_autocfg:1;
 	unsigned int		uart_16550_compatible:1;
+	unsigned int		has_pl330_dma:1;
 };
 
 #define BYT_PRV_CLK			0x800
@@ -303,6 +305,7 @@ static void dw8250_quirks(struct uart_port *p, struct dw8250_data *data)
 static void dw8250_setup_port(struct uart_port *p)
 {
 	struct uart_8250_port *up = up_to_u8250p(p);
+	struct dw8250_data *data = p->private_data;
 	u32 reg;
 
 	/*
@@ -326,6 +329,14 @@ static void dw8250_setup_port(struct uart_port *p)
 		p->flags |= UPF_FIXED_TYPE;
 		p->fifosize = DW_UART_CPR_FIFO_SIZE(reg);
 		up->capabilities = UART_CAP_FIFO;
+		if (data->has_pl330_dma) {
+			p->type = PORT_AMD_8250;
+
+			up->ier |= UART_IER_PTIME | UART_IER_THRI |
+				UART_IER_RLSI | UART_IER_RDI;
+			up->fcr |= UART_FCR_R_TRIG_10 | UART_FCR_T_TRIG_11;
+			up->tx_loadsz = p->fifosize / 2;
+		}
 	}
 
 	if (reg & DW_UART_CPR_AFCE_MODE)
@@ -339,6 +350,7 @@ static int dw8250_probe(struct platform_device *pdev)
 	int irq = platform_get_irq(pdev, 0);
 	struct uart_port *p = &uart.port;
 	struct dw8250_data *data;
+	struct plat_dw8250_data *pdata = dev_get_platdata(&pdev->dev);
 	int err;
 	u32 val;
 
@@ -468,6 +480,7 @@ static int dw8250_probe(struct platform_device *pdev)
 		p->handle_irq = NULL;
 	}
 
+	data->has_pl330_dma = pdata ? pdata->has_pl330_dma : 0;
 	if (!data->skip_autocfg)
 		dw8250_setup_port(p);
 
@@ -475,6 +488,8 @@ static int dw8250_probe(struct platform_device *pdev)
 	if (p->fifosize) {
 		data->dma.rxconf.src_maxburst = p->fifosize / 4;
 		data->dma.txconf.dst_maxburst = p->fifosize / 4;
+		data->dma.rx_size
+			= data->has_pl330_dma ? (p->fifosize / 2 + 2) : 0;
 		uart.dma = &data->dma;
 	}
 
