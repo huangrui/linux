@@ -1145,6 +1145,12 @@ int follow_phys(struct vm_area_struct *vma, unsigned long address,
 int generic_access_phys(struct vm_area_struct *vma, unsigned long addr,
 			void *buf, int len, int write);
 
+#ifdef CONFIG_ARCH_HAS_PGD_INIT_LATE
+void arch_pgd_init_late(struct mm_struct *mm);
+#else
+static inline void arch_pgd_init_late(struct mm_struct *mm) { }
+#endif
+
 static inline void unmap_shared_mapping_range(struct address_space *mapping,
 		loff_t const holebegin, loff_t const holelen)
 {

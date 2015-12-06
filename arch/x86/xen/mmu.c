@@ -45,6 +45,7 @@
 #include <linux/vmalloc.h>
 #include <linux/module.h>
 #include <linux/gfp.h>
+#include <linux/oom.h>
 #include <linux/memblock.h>
 #include <linux/seq_file.h>
 #include <linux/crash_dump.h>
@@ -854,18 +855,34 @@ static void xen_pgd_pin(struct mm_struct *mm)
  */
 void xen_mm_pin_all(void)
 {
-	struct page *page;
+	struct task_struct *g;
 
+	rcu_read_lock(); /* Task list walk */
 	spin_lock(&pgd_lock);
 
-	list_for_each_entry(page, &pgd_list, lru) {
+	for_each_process(g) {
+		struct task_struct *p;
+		struct mm_struct *mm;
+		struct page *page;
+		pgd_t *pgd;
+
+		p = find_lock_task_mm(g);
+		if (!p)
+			continue;
+
+		mm = p->mm;
+		pgd = mm->pgd;
+		page = virt_to_page(pgd);
+
 		if (!PagePinned(page)) {
-			__xen_pgd_pin(&init_mm, (pgd_t *)page_address(page));
+			__xen_pgd_pin(&init_mm, pgd);
 			SetPageSavePinned(page);
 		}
+		task_unlock(p);
 	}
 
 	spin_unlock(&pgd_lock);
+	rcu_read_unlock();
 }
 
 /*
@@ -968,19 +985,35 @@ static void xen_pgd_unpin(struct mm_struct *mm)
  */
 void xen_mm_unpin_all(void)
 {
-	struct page *page;
+	struct task_struct *g;
 
+	rcu_read_lock(); /* Task list walk */
 	spin_lock(&pgd_lock);
 
-	list_for_each_entry(page, &pgd_list, lru) {
+	for_each_process(g) {
+		struct task_struct *p;
+		struct mm_struct *mm;
+		struct page *page;
+		pgd_t *pgd;
+
+		p = find_lock_task_mm(g);
+		if (!p)
+			continue;
+
+		mm = p->mm;
+		pgd = mm->pgd;
+		page = virt_to_page(pgd);
+
 		if (PageSavePinned(page)) {
 			BUG_ON(!PagePinned(page));
-			__xen_pgd_unpin(&init_mm, (pgd_t *)page_address(page));
+			__xen_pgd_unpin(&init_mm, pgd);
 			ClearPageSavePinned(page);
 		}
+		task_unlock(p);
 	}
 
 	spin_unlock(&pgd_lock);
+	rcu_read_unlock();
 }
 
 static void xen_activate_mm(struct mm_struct *prev, struct mm_struct *next)

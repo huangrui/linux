@@ -14,6 +14,7 @@
 #include <linux/prefetch.h>		/* prefetchw			*/
 #include <linux/context_tracking.h>	/* exception_enter(), ...	*/
 #include <linux/uaccess.h>		/* faulthandler_disabled()	*/
+#include <linux/oom.h>			/* find_lock_task_mm(), ...	*/
 
 #include <asm/traps.h>			/* dotraplinkage, ...		*/
 #include <asm/pgalloc.h>		/* pgd_*(), ...			*/
@@ -188,7 +189,6 @@ force_sig_info_fault(int si_signo, int si_code, unsigned long address,
 }
 
 DEFINE_SPINLOCK(pgd_lock);
-LIST_HEAD(pgd_list);
 
 #ifdef CONFIG_X86_32
 static inline pmd_t *vmalloc_sync_one(pgd_t *pgd, unsigned long address)
@@ -237,24 +237,38 @@ void vmalloc_sync_all(void)
 	for (address = VMALLOC_START & PMD_MASK;
 	     address >= TASK_SIZE && address < FIXADDR_TOP;
 	     address += PMD_SIZE) {
-		struct page *page;
 
+		struct task_struct *g;
+
+		rcu_read_lock(); /* Task list walk */
 		spin_lock(&pgd_lock);
-		list_for_each_entry(page, &pgd_list, lru) {
+
+		for_each_process(g) {
+			struct task_struct *p;
+			struct mm_struct *mm;
 			spinlock_t *pgt_lock;
-			pmd_t *ret;
+			pmd_t *pmd_ret;
 
-			/* the pgt_lock only for Xen */
-			pgt_lock = &pgd_page_get_mm(page)->page_table_lock;
+			p = find_lock_task_mm(g);
+			if (!p)
+				continue;
 
+			mm = p->mm;
+
+			/* The pgt_lock is only used on Xen: */
+			pgt_lock = &mm->page_table_lock;
 			spin_lock(pgt_lock);
-			ret = vmalloc_sync_one(page_address(page), address);
+			pmd_ret = vmalloc_sync_one(mm->pgd, address);
 			spin_unlock(pgt_lock);
 
-			if (!ret)
+			task_unlock(p);
+
+			if (!pmd_ret)
 				break;
 		}
+
 		spin_unlock(&pgd_lock);
+		rcu_read_unlock();
 	}
 }
 
@@ -353,7 +367,7 @@ out:
 
 void vmalloc_sync_all(void)
 {
-	sync_global_pgds(VMALLOC_START & PGDIR_MASK, VMALLOC_END, 0);
+	sync_global_pgds(VMALLOC_START & PGDIR_MASK, VMALLOC_END);
 }
 
 /*

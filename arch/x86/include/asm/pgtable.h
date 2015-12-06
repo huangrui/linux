@@ -36,9 +36,6 @@ extern unsigned long empty_zero_page[PAGE_SIZE / sizeof(unsigned long)]
 #define ZERO_PAGE(vaddr) (virt_to_page(empty_zero_page))
 
 extern spinlock_t pgd_lock;
-extern struct list_head pgd_list;
-
-extern struct mm_struct *pgd_page_get_mm(struct page *page);
 
 #ifdef CONFIG_PARAVIRT
 #include <asm/paravirt.h>

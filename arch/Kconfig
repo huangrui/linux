@@ -503,6 +503,15 @@ config PGTABLE_LEVELS
 	int
 	default 2
 
+config ARCH_HAS_PGD_INIT_LATE
+	bool
+	help
+	  Architectures that want a late PGD initialization can define
+	  the arch_pgd_init_late() callback and it will be called
+	  by the generic new task (fork()) code after a new task has
+	  been made visible on the task list, but before it has been
+	  first scheduled.
+
 config ARCH_HAS_ELF_RANDOMIZE
 	bool
 	help

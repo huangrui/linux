@@ -1608,6 +1608,22 @@ static struct task_struct *copy_process(unsigned long clone_flags,
 	syscall_tracepoint_update(p);
 	write_unlock_irq(&tasklist_lock);
 
+	/*
+	 * If we have a new PGD then initialize it:
+	 *
+	 * This method is called after a task has been made visible
+	 * on the task list already.
+	 *
+	 * Architectures that manage per task kernel pagetables
+	 * might use this callback to initialize them after they
+	 * are already visible to new updates.
+	 *
+	 * NOTE: any user-space parts of the PGD are already initialized
+	 *       and must not be clobbered.
+	 */
+	if (!(clone_flags & CLONE_VM))
+		arch_pgd_init_late(p->mm);
+
 	proc_fork_connector(p);
 	cgroup_post_fork(p, cgrp_ss_priv);
 	if (clone_flags & CLONE_THREAD)

@@ -33,6 +33,7 @@
 #include <linux/nmi.h>
 #include <linux/gfp.h>
 #include <linux/kcore.h>
+#include <linux/oom.h>
 
 #include <asm/processor.h>
 #include <asm/bios_ebda.h>
@@ -160,50 +161,64 @@ static int __init nonx32_setup(char *str)
 __setup("noexec32=", nonx32_setup);
 
 /*
- * When memory was added/removed make sure all the processes MM have
- * suitable PGD entries in the local PGD level page.
+ * When memory was added make sure all the process MMs have
+ * matching PGD entries in the local PGD level page as well.
  */
-void sync_global_pgds(unsigned long start, unsigned long end, int removed)
+void sync_global_pgds(unsigned long start, unsigned long end)
 {
 	unsigned long address;
 
 	for (address = start; address <= end; address += PGDIR_SIZE) {
 		const pgd_t *pgd_ref = pgd_offset_k(address);
-		struct page *page;
+		struct task_struct *g;
 
-		/*
-		 * When it is called after memory hot remove, pgd_none()
-		 * returns true. In this case (removed == 1), we must clear
-		 * the PGD entries in the local PGD level page.
-		 */
-		if (pgd_none(*pgd_ref) && !removed)
+		/* Only sync (potentially) newly added PGD entries: */
+		if (pgd_none(*pgd_ref))
 			continue;
 
+		rcu_read_lock(); /* Task list walk */
+
+		/*
+		 * Since this is x86, this spin_lock() is also a full memory barrier that
+		 * is required for correct operation of the lockless reading of PGDs
+		 * in arch_pgd_init_late(). If you ever move this code to another
+		 * architecture or to generic code you need to make sure this is
+		 * an:
+		 *
+		 *	smp_mb();
+		 *
+		 * before looking at PGDs in the loop below.
+		 */
 		spin_lock(&pgd_lock);
-		list_for_each_entry(page, &pgd_list, lru) {
+
+		for_each_process(g) {
+			struct task_struct *p;
+			struct mm_struct *mm;
 			pgd_t *pgd;
 			spinlock_t *pgt_lock;
 
-			pgd = (pgd_t *)page_address(page) + pgd_index(address);
-			/* the pgt_lock only for Xen */
-			pgt_lock = &pgd_page_get_mm(page)->page_table_lock;
+			p = find_lock_task_mm(g);
+			if (!p)
+				continue;
+
+			mm = p->mm;
+			pgd = mm->pgd;
+
+			/* The pgt_lock is only used by Xen: */
+			pgt_lock = &mm->page_table_lock;
 			spin_lock(pgt_lock);
 
 			if (!pgd_none(*pgd_ref) && !pgd_none(*pgd))
-				BUG_ON(pgd_page_vaddr(*pgd)
-				       != pgd_page_vaddr(*pgd_ref));
+				BUG_ON(pgd_page_vaddr(*pgd) != pgd_page_vaddr(*pgd_ref));
 
-			if (removed) {
-				if (pgd_none(*pgd_ref) && !pgd_none(*pgd))
-					pgd_clear(pgd);
-			} else {
-				if (pgd_none(*pgd))
-					set_pgd(pgd, *pgd_ref);
-			}
+			if (pgd_none(*pgd))
+				set_pgd(pgd, *pgd_ref);
 
 			spin_unlock(pgt_lock);
+			task_unlock(p);
 		}
 		spin_unlock(&pgd_lock);
+		rcu_read_unlock();
 	}
 }
 
@@ -632,7 +647,7 @@ kernel_physical_mapping_init(unsigned long start,
 	}
 
 	if (pgd_changed)
-		sync_global_pgds(addr, end - 1, 0);
+		sync_global_pgds(addr, end - 1);
 
 	__flush_tlb_all();
 
@@ -764,27 +779,6 @@ static void __meminit free_pmd_table(pmd_t *pmd_start, pud_t *pud)
 	spin_lock(&init_mm.page_table_lock);
 	pud_clear(pud);
 	spin_unlock(&init_mm.page_table_lock);
-}
-
-/* Return true if pgd is changed, otherwise return false. */
-static bool __meminit free_pud_table(pud_t *pud_start, pgd_t *pgd)
-{
-	pud_t *pud;
-	int i;
-
-	for (i = 0; i < PTRS_PER_PUD; i++) {
-		pud = pud_start + i;
-		if (pud_val(*pud))
-			return false;
-	}
-
-	/* free a pud table */
-	free_pagetable(pgd_page(*pgd), 0);
-	spin_lock(&init_mm.page_table_lock);
-	pgd_clear(pgd);
-	spin_unlock(&init_mm.page_table_lock);
-
-	return true;
 }
 
 static void __meminit
@@ -978,7 +972,6 @@ remove_pagetable(unsigned long start, unsigned long end, bool direct)
 	unsigned long addr;
 	pgd_t *pgd;
 	pud_t *pud;
-	bool pgd_changed = false;
 
 	for (addr = start; addr < end; addr = next) {
 		next = pgd_addr_end(addr, end);
@@ -989,12 +982,7 @@ remove_pagetable(unsigned long start, unsigned long end, bool direct)
 
 		pud = (pud_t *)pgd_page_vaddr(*pgd);
 		remove_pud_table(pud, addr, next, direct);
-		if (free_pud_table(pud, pgd))
-			pgd_changed = true;
 	}
-
-	if (pgd_changed)
-		sync_global_pgds(start, end - 1, 1);
 
 	flush_tlb_all();
 }
@@ -1301,7 +1289,7 @@ int __meminit vmemmap_populate(unsigned long start, unsigned long end, int node)
 	else
 		err = vmemmap_populate_basepages(start, end, node);
 	if (!err)
-		sync_global_pgds(start, end - 1, 0);
+		sync_global_pgds(start, end - 1);
 	return err;
 }
 

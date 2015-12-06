@@ -12,6 +12,7 @@
 #include <linux/pfn.h>
 #include <linux/percpu.h>
 #include <linux/gfp.h>
+#include <linux/oom.h>
 #include <linux/pci.h>
 #include <linux/vmalloc.h>
 
@@ -448,18 +449,36 @@ static void __set_pmd_pte(pte_t *kpte, unsigned long address, pte_t pte)
 	set_pte_atomic(kpte, pte);
 #ifdef CONFIG_X86_32
 	if (!SHARED_KERNEL_PMD) {
-		struct page *page;
+		struct task_struct *g;
 
-		list_for_each_entry(page, &pgd_list, lru) {
+		rcu_read_lock(); /* Task list walk */
+
+		for_each_process(g) {
+			struct task_struct *p;
+			struct mm_struct *mm;
+			spinlock_t *pgt_lock;
 			pgd_t *pgd;
 			pud_t *pud;
 			pmd_t *pmd;
 
-			pgd = (pgd_t *)page_address(page) + pgd_index(address);
+			p = find_lock_task_mm(g);
+			if (!p)
+				continue;
+
+			mm = p->mm;
+			pgt_lock = &mm->page_table_lock;
+			spin_lock(pgt_lock);
+
+			pgd = mm->pgd + pgd_index(address);
 			pud = pud_offset(pgd, address);
 			pmd = pmd_offset(pud, address);
 			set_pte_atomic((pte_t *)pmd, pte);
+
+			spin_unlock(pgt_lock);
+
+			task_unlock(p);
 		}
+		rcu_read_unlock();
 	}
 #endif
 }
@@ -741,18 +760,6 @@ static bool try_to_free_pmd_page(pmd_t *pmd)
 	return true;
 }
 
-static bool try_to_free_pud_page(pud_t *pud)
-{
-	int i;
-
-	for (i = 0; i < PTRS_PER_PUD; i++)
-		if (!pud_none(pud[i]))
-			return false;
-
-	free_page((unsigned long)pud);
-	return true;
-}
-
 static bool unmap_pte_range(pmd_t *pmd, unsigned long start, unsigned long end)
 {
 	pte_t *pte = pte_offset_kernel(pmd, start);
@@ -871,9 +878,6 @@ static void unmap_pgd_range(pgd_t *root, unsigned long addr, unsigned long end)
 	pgd_t *pgd_entry = root + pgd_index(addr);
 
 	unmap_pud_range(pgd_entry, addr, end);
-
-	if (try_to_free_pud_page((pud_t *)pgd_page_vaddr(*pgd_entry)))
-		pgd_clear(pgd_entry);
 }
 
 static int alloc_pte_page(pmd_t *pmd)
