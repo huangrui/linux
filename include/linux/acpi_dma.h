@@ -62,11 +62,15 @@ struct acpi_dma_filter_info {
 int acpi_dma_controller_register(struct device *dev,
 		struct dma_chan *(*acpi_dma_xlate)
 		(struct acpi_dma_spec *, struct acpi_dma *),
+		unsigned short base_request_line,
+		unsigned short num,
 		void *data);
 int acpi_dma_controller_free(struct device *dev);
 int devm_acpi_dma_controller_register(struct device *dev,
 		struct dma_chan *(*acpi_dma_xlate)
 		(struct acpi_dma_spec *, struct acpi_dma *),
+		unsigned short base_request_line,
+		unsigned short num,
 		void *data);
 void devm_acpi_dma_controller_free(struct device *dev);
 
@@ -82,6 +86,8 @@ struct dma_chan *acpi_dma_simple_xlate(struct acpi_dma_spec *dma_spec,
 static inline int acpi_dma_controller_register(struct device *dev,
 		struct dma_chan *(*acpi_dma_xlate)
 		(struct acpi_dma_spec *, struct acpi_dma *),
+		unsigned short base_request_line,
+		unsigned short num,
 		void *data)
 {
 	return -ENODEV;

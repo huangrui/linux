@@ -105,7 +105,7 @@ static int acpi_dma_parse_resource_group(const struct acpi_csrt_group *grp,
  * We are using this table to get the request line range of the specific DMA
  * controller to be used later.
  */
-static void acpi_dma_parse_csrt(struct acpi_device *adev, struct acpi_dma *adma)
+static int acpi_dma_parse_csrt(struct acpi_device *adev, struct acpi_dma *adma)
 {
 	struct acpi_csrt_group *grp, *end;
 	struct acpi_table_csrt *csrt;
@@ -117,7 +117,7 @@ static void acpi_dma_parse_csrt(struct acpi_device *adev, struct acpi_dma *adma)
 	if (ACPI_FAILURE(status)) {
 		if (status != AE_NOT_FOUND)
 			dev_warn(&adev->dev, "failed to get the CSRT table\n");
-		return;
+		return -ENOENT;
 	}
 
 	grp = (struct acpi_csrt_group *)(csrt + 1);
@@ -128,11 +128,12 @@ static void acpi_dma_parse_csrt(struct acpi_device *adev, struct acpi_dma *adma)
 		if (ret < 0) {
 			dev_warn(&adev->dev,
 				 "error in parsing resource group\n");
-			return;
+			return -EINVAL;
 		}
 
 		grp = (struct acpi_csrt_group *)((void *)grp + grp->length);
 	}
+	return 0;
 }
 
 /**
@@ -140,6 +141,8 @@ static void acpi_dma_parse_csrt(struct acpi_device *adev, struct acpi_dma *adma)
  * @dev:		struct device of DMA controller
  * @acpi_dma_xlate:	translation function which converts a dma specifier
  *			into a dma_chan structure
+ * @base_request_line:  device request line base
+ * @num:                device request line range
  * @data		pointer to controller specific data to be used by
  *			translation function
  *
@@ -152,10 +155,13 @@ static void acpi_dma_parse_csrt(struct acpi_device *adev, struct acpi_dma *adma)
 int acpi_dma_controller_register(struct device *dev,
 		struct dma_chan *(*acpi_dma_xlate)
 		(struct acpi_dma_spec *, struct acpi_dma *),
+		unsigned short base_request_line,
+		unsigned short num,
 		void *data)
 {
 	struct acpi_device *adev;
 	struct acpi_dma	*adma;
+	int ret;
 
 	if (!dev || !acpi_dma_xlate)
 		return -EINVAL;
@@ -173,7 +179,12 @@ int acpi_dma_controller_register(struct device *dev,
 	adma->acpi_dma_xlate = acpi_dma_xlate;
 	adma->data = data;
 
-	acpi_dma_parse_csrt(adev, adma);
+	ret = acpi_dma_parse_csrt(adev, adma);
+
+	if (ret < 0) {
+		adma->base_request_line = base_request_line;
+		adma->end_request_line = base_request_line + num;
+	}
 
 	/* Now queue acpi_dma controller structure in list */
 	mutex_lock(&acpi_dma_lock);
@@ -236,6 +247,8 @@ static void devm_acpi_dma_release(struct device *dev, void *res)
 int devm_acpi_dma_controller_register(struct device *dev,
 		struct dma_chan *(*acpi_dma_xlate)
 		(struct acpi_dma_spec *, struct acpi_dma *),
+		unsigned short base_request_line,
+		unsigned short num,
 		void *data)
 {
 	void *res;
@@ -245,7 +258,9 @@ int devm_acpi_dma_controller_register(struct device *dev,
 	if (!res)
 		return -ENOMEM;
 
-	ret = acpi_dma_controller_register(dev, acpi_dma_xlate, data);
+	ret = acpi_dma_controller_register(dev, acpi_dma_xlate,
+					   base_request_line,
+					   num, data);
 	if (ret) {
 		devres_free(res);
 		return ret;

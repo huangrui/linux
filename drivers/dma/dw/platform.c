@@ -88,7 +88,7 @@ static void dw_dma_acpi_controller_register(struct dw_dma *dw)
 	info->filter_fn = dw_dma_acpi_filter;
 
 	ret = devm_acpi_dma_controller_register(dev, acpi_dma_simple_xlate,
-						info);
+						0, 0, info);
 	if (ret)
 		dev_err(dev, "could not register acpi_dma_controller\n");
 }
