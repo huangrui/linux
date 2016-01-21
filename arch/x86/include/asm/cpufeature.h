@@ -259,6 +259,7 @@
 
 /* AMD-defined CPU features, CPUID level 0x80000008 (ebx), word 13 */
 #define X86_FEATURE_CLZERO	(13*32+0) /* CLZERO instruction */
+#define X86_FEATURE_IRPERF	(13*32+1) /* Instructions Retired Count */
 
 /*
  * BUG word(s)
