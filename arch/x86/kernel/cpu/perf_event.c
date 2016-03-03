@@ -1601,6 +1601,7 @@ ssize_t events_sysfs_show(struct device *dev, struct device_attribute *attr,
 
 	return x86_pmu.events_sysfs_show(page, config);
 }
+EXPORT_SYMBOL_GPL(events_sysfs_show);
 
 EVENT_ATTR(cpu-cycles,			CPU_CYCLES		);
 EVENT_ATTR(instructions,		INSTRUCTIONS		);
