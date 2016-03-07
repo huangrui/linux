@@ -34,6 +34,7 @@ obj-$(CONFIG_PERF_EVENTS)		+= perf_event.o
 
 ifdef CONFIG_PERF_EVENTS
 obj-$(CONFIG_CPU_SUP_AMD)		+= perf_event_amd.o perf_event_amd_uncore.o
+obj-$(CONFIG_PERF_EVENTS_AMD_POWER)	+= perf_event_amd_power.o
 ifdef CONFIG_AMD_IOMMU
 obj-$(CONFIG_CPU_SUP_AMD)		+= perf_event_amd_iommu.o
 endif
