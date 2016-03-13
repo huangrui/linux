@@ -31,6 +31,7 @@
 #include <linux/sched.h>
 #include <asm/processor.h>
 #include <asm/msr.h>
+#include <asm/smp.h>
 
 MODULE_DESCRIPTION("AMD Family 15h CPU processor power monitor");
 MODULE_AUTHOR("Andreas Herrmann <herrmann.der.user@googlemail.com>");
